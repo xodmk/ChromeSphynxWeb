@@ -1,0 +1,147 @@
+{
+  "site": {
+    "title": "Chrome Sphynx Audio",
+    "description": "Professional VST3 Plugins for Music Production Sound Design"
+  },
+  "header": {
+    "title": "Chrome Sphynx Audio",
+    "logo": "/gfx/chromeSphynxRecords_snakeidol_FFX2560x.jpg",
+    "logoAlt": "Chrome Sphynx Records Snake Idol",
+    "logoWidth": 400,
+    "logoHeight": 400
+  },
+  "hero": {
+    "subtitle": "Professional VST3 Plugins for Abstract Sound Design",
+    "description": "Cutting-edge audio tools designed for producers, sound designers, and electronic music artists who demand exceptional quality and creative freedom."
+  },
+  "plugins": {
+    "title": "Featured Plugins",
+    "subtitle": "Discover our flagship audio processing tools",
+    "items": [
+      {
+        "id": "DDLSD",
+        "name": "DDLSD Stereo Delay",
+        "shortDescription": "Dual Delay Engines with unique repeat & freeze and stereo tilt features, Multimode filtering, Crossfade controls",
+        "description": "Transform sounds with spectral precision using advanced morphing algorithms. Perfect for creating evolving textures and impossible sonic transformations.",
+        "image": "/images/plugins/spectral-morph.jpg",
+        "demoAudio": "/audio/spectral-morph-demo.mp3",
+        "price": "$79",
+        "features": [
+          "Real-time spectral analysis",
+          "Advanced morphing algorithms", 
+          "200+ professional presets",
+          "MIDI learn functionality"
+        ],
+        "gradient": "card-image-1"
+      },
+      {
+        "id": "chaos-generator", 
+        "name": "Chaos Generator",
+        "shortDescription": "Controlled randomization engine",
+        "description": "Generate unpredictable yet musical soundscapes with our advanced chaos algorithms. Turn static sounds into living, breathing textures.",
+        "image": "/images/plugins/chaos-generator.jpg", 
+        "demoAudio": "/audio/chaos-generator-demo.mp3",
+        "price": "$59",
+        "features": [
+          "Controlled randomization",
+          "Pattern evolution engine",
+          "MIDI sync capabilities",
+          "Probability-based processing"
+        ],
+        "gradient": "card-image-2"
+      },
+      {
+        "id": "dimensional-reverb",
+        "name": "Dimensional Reverb", 
+        "shortDescription": "Multi-dimensional spatial processor",
+        "description": "Create immersive 3D soundscapes with our revolutionary spatial reverb engine. From intimate rooms to infinite cosmic spaces.",
+        "image": "/images/plugins/dimensional-reverb.jpg",
+        "demoAudio": "/audio/dimensional-reverb-demo.mp3", 
+        "price": "$89",
+        "features": [
+          "3D spatial processing",
+          "Room modeling technology",
+          "Surround sound support",
+          "Advanced modulation matrix"
+        ],
+        "gradient": "card-image-3"
+      }
+    ]
+  },
+  "showcase": {
+    "title": "Experience the Sound",
+    "subtitle": "Hear our plugins in action", 
+    "description": "Listen to real-world examples of our plugins transforming ordinary sounds into extraordinary sonic experiences.",
+    "video": "/videos/showcase-demo.mp4",
+    "poster": "/images/showcase-poster.jpg",
+    "buttonText": "▶ Watch Demo"
+  },
+  "features": {
+    "title": "Why Choose Chrome Sphynx Audio?",
+    "subtitle": "Professional tools built for professionals",
+    "items": [
+      {
+        "icon": "🔬",
+        "title": "Research-Driven Development",
+        "description": "Our algorithms are based on cutting-edge research in digital signal processing and machine learning, ensuring state-of-the-art audio quality."
+      },
+      {
+        "icon": "🎛️", 
+        "title": "Intuitive Professional Interface",
+        "description": "Streamlined controls that make complex processing accessible while maintaining the depth that professionals demand."
+      },
+      {
+        "icon": "⚡",
+        "title": "Optimized Performance", 
+        "description": "Highly efficient code ensures smooth real-time performance, even with multiple instances in demanding production environments."
+      },
+      {
+        "icon": "🎯",
+        "title": "Industry Standard Compatibility",
+        "description": "Full VST3, AU, and AAX support ensures seamless integration with all major digital audio workstations."
+      },
+      {
+        "icon": "🛠️",
+        "title": "Professional Support",
+        "description": "Comprehensive documentation, video tutorials, and responsive technical support from our experienced team."
+      },
+      {
+        "icon": "🔄",
+        "title": "Regular Updates",
+        "description": "Continuous development with regular feature updates, bug fixes, and new preset collections to keep your tools current."
+      }
+    ]
+  },
+  "testimonials": {
+    "title": "What Artists Say",
+    "items": [
+      {
+        "quote": "Chrome Sphynx plugins have become essential tools in my production workflow. The sound quality is unmatched.",
+        "author": "Sarah Chen",
+        "title": "Electronic Producer",
+        "company": "Warp Records"
+      },
+      {
+        "quote": "The Spectral Morph plugin opened up entirely new creative possibilities I never knew existed.",
+        "author": "Marcus Rodriguez", 
+        "title": "Film Composer",
+        "company": "Sony Pictures"
+      }
+    ]
+  },
+  "footer": {
+    "copyright": "© 2025 Chrome Sphynx Audio. All rights reserved.",
+    "tagline": "Pushing the boundaries of digital audio",
+    "links": [
+      { "text": "Privacy Policy", "href": "/privacy" },
+      { "text": "Terms of Service", "href": "/terms" },
+      { "text": "Contact", "href": "/contact" },
+      { "text": "Support", "href": "/support" }
+    ],
+    "social": [
+      { "platform": "YouTube", "url": "https://youtube.com/@chromesphynxaudio" },
+      { "platform": "SoundCloud", "url": "https://soundcloud.com/chromesphynxaudio" },
+      { "platform": "Instagram", "url": "https://instagram.com/chromesphynxaudio" }
+    ]
+  }
+}
