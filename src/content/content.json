@@ -15,9 +15,29 @@
     "description": "Cutting-edge audio tools designed for producers, sound designers, and electronic music artists who demand exceptional quality and creative freedom."
   },
   "plugins": {
-    "title": "Featured Plugins",
-    "subtitle": "Discover our flagship audio processing tools",
+    "title": "Available Plugins",
+    "subtitle"CSPHX audio processing tools",
     "items": [
+      {
+        "id": "CSPHX BROT",
+        "name": "Block Rotator",
+        "shortDescription": "Feedback Delay Network with adaptive feedback control, matrix effects, Multimode filtering, Crossfade controls",
+        "description": "Transform sounds with spectral precision using advanced morphing algorithms. Perfect for creating evolving textures and impossible sonic transformations.",
+        "image": "/images/plugins/spectral-morph.jpg",
+        "demoAudio": "/audio/spectral-morph-demo.mp3",
+        "price": "$79",
+        "features": [
+          "Multi Channel Feedback Delay Network",
+          "Multi Channel Diffusion Network", 
+          "Matrix Effects (Linear Algebra Operations)",
+          "Reverb Room Size & Length control",
+          "Adaptive feedback Automation",
+          "Single Side-band Modulation & Pitch Shifting",
+          "Early resonant feedback delays",
+          "Multimodefiltering in the feedback path"
+        ],
+        "gradient": "card-image-1"
+      },
       {
         "id": "DDLSD",
         "name": "DDLSD Stereo Delay",
@@ -31,22 +51,6 @@
           "Advanced morphing algorithms", 
           "200+ professional presets",
           "MIDI learn functionality"
-        ],
-        "gradient": "card-image-1"
-      },
-      {
-        "id": "chaos-generator", 
-        "name": "Chaos Generator",
-        "shortDescription": "Controlled randomization engine",
-        "description": "Generate unpredictable yet musical soundscapes with our advanced chaos algorithms. Turn static sounds into living, breathing textures.",
-        "image": "/images/plugins/chaos-generator.jpg", 
-        "demoAudio": "/audio/chaos-generator-demo.mp3",
-        "price": "$59",
-        "features": [
-          "Controlled randomization",
-          "Pattern evolution engine",
-          "MIDI sync capabilities",
-          "Probability-based processing"
         ],
         "gradient": "card-image-2"
       },
