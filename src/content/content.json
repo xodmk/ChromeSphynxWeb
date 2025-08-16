@@ -16,7 +16,7 @@
   },
   "plugins": {
     "title": "Available Plugins",
-    "subtitle"CSPHX audio processing tools",
+    "subtitle": "CSPHX audio processing tools",
     "items": [
       {
         "id": "CSPHX BROT",
