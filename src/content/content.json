@@ -112,23 +112,6 @@
       }
     ]
   },
-  "testimonials": {
-    "title": "What Artists Say",
-    "items": [
-      {
-        "quote": "Chrome Sphynx plugins have become essential tools in my production workflow. The sound quality is unmatched.",
-        "author": "Sarah Chen",
-        "title": "Electronic Producer",
-        "company": "Warp Records"
-      },
-      {
-        "quote": "The Spectral Morph plugin opened up entirely new creative possibilities I never knew existed.",
-        "author": "Marcus Rodriguez", 
-        "title": "Film Composer",
-        "company": "Sony Pictures"
-      }
-    ]
-  },
   "footer": {
     "copyright": "© 2025 Chrome Sphynx Audio. All rights reserved.",
     "tagline": "Pushing the boundaries of digital audio",
@@ -140,7 +123,7 @@
     ],
     "social": [
       { "platform": "YouTube", "url": "https://youtube.com/@chromesphynxaudio" },
-      { "platform": "SoundCloud", "url": "https://soundcloud.com/chromesphynxaudio" },
+      { "platform": "Bandcamp, "url": "https://djoto.bandcamp.com/" },
       { "platform": "Instagram", "url": "https://instagram.com/chromesphynxaudio" }
     ]
   }
