@@ -47,27 +47,28 @@
         "demoAudio": "/audio/spectral-morph-demo.mp3",
         "price": "$79",
         "features": [
-          "Real-time spectral analysis",
-          "Advanced morphing algorithms", 
-          "200+ professional presets",
-          "MIDI learn functionality"
+          "Dual Engine Delay functions",
+          "Freeze & Scan Grain Delay",
+          "Steteo Tilt CTRL",
+          "State Capture Crossfade CTRL",
+          "Assignable XY CTRL",
+          "Color Palette array"
         ],
         "gradient": "card-image-2"
       },
       {
-        "id": "dimensional-reverb",
+        "id": "GodVader",
         "name": "Dimensional Reverb", 
-        "shortDescription": "Multi-dimensional spatial processor",
-        "description": "Create immersive 3D soundscapes with our revolutionary spatial reverb engine. From intimate rooms to infinite cosmic spaces.",
+        "shortDescription": "Hybrid Stereo Reverb algorithm",
+        "description": "Reverband stereo sculpting effect.",
         "image": "/images/plugins/dimensional-reverb.jpg",
         "demoAudio": "/audio/dimensional-reverb-demo.mp3", 
-        "price": "$89",
+        "price": "$46",
         "features": [
-          "3D spatial processing",
-          "Room modeling technology",
-          "Surround sound support",
-          "Advanced modulation matrix"
-        ],
+          "Stereo Reverb processing",
+          "State Capture Crossfade CTRL",
+          "Assignable XY CTRL",
+          "Color Palette array"      ],
         "gradient": "card-image-3"
       }
     ]
@@ -85,32 +86,26 @@
     "subtitle": "Professional tools built for professionals",
     "items": [
       {
-        "icon": "🔬",
         "title": "Research-Driven Development",
         "description": "Our algorithms are based on cutting-edge research in digital signal processing and machine learning, ensuring state-of-the-art audio quality."
       },
       {
-        "icon": "🎛️", 
         "title": "Intuitive Professional Interface",
         "description": "Streamlined controls that make complex processing accessible while maintaining the depth that professionals demand."
       },
       {
-        "icon": "⚡",
         "title": "Optimized Performance", 
         "description": "Highly efficient code ensures smooth real-time performance, even with multiple instances in demanding production environments."
       },
       {
-        "icon": "🎯",
         "title": "Industry Standard Compatibility",
         "description": "Full VST3, AU, and AAX support ensures seamless integration with all major digital audio workstations."
       },
       {
-        "icon": "🛠️",
         "title": "Professional Support",
         "description": "Comprehensive documentation, video tutorials, and responsive technical support from our experienced team."
       },
       {
-        "icon": "🔄",
         "title": "Regular Updates",
         "description": "Continuous development with regular feature updates, bug fixes, and new preset collections to keep your tools current."
       }
