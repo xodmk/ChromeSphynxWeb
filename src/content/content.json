@@ -22,6 +22,7 @@
       {
         "id": "CSPHX BROT",
         "name": "Block Rotator",
+        "title": "Block Rotator",
         "shortDescription": "Feedback Delay Network with adaptive feedback control, matrix effects, Multimode filtering, Crossfade controls",
         "description": "Transform sounds with spectral precision using advanced morphing algorithms. Perfect for creating evolving textures and impossible sonic transformations.",
         "image": "/images/plugins/spectral-morph.jpg",
@@ -42,6 +43,7 @@
       {
         "id": "DDLSD",
         "name": "DDLSD Stereo Delay",
+        "title": "DDLSD Stereo Delay",
         "shortDescription": "Dual Delay Engines with unique repeat & freeze and stereo tilt features, Multimode filtering, Crossfade controls",
         "description": "Transform sounds with spectral precision using advanced morphing algorithms. Perfect for creating evolving textures and impossible sonic transformations.",
         "image": "/images/plugins/spectral-morph.jpg",
@@ -59,7 +61,8 @@
       },
       {
         "id": "GODVDR",
-        "name": "GodVader", 
+        "name": "GodVader",
+        "title": "GodVader Stero Reverb",
         "shortDescription": "Hybrid Stereo Reverb algorithm",
         "description": "Reverband stereo sculpting effect.",
         "image": "/images/plugins/dimensional-reverb.jpg",
