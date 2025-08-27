@@ -57,8 +57,8 @@
         "gradient": "card-image-2"
       },
       {
-        "id": "GodVader",
-        "name": "Dimensional Reverb", 
+        "id": "GODVDR",
+        "name": "GodVader", 
         "shortDescription": "Hybrid Stereo Reverb algorithm",
         "description": "Reverband stereo sculpting effect.",
         "image": "/images/plugins/dimensional-reverb.jpg",
