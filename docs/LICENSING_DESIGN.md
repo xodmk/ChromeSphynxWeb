@@ -74,6 +74,14 @@ Companion spec for the plugin repos: `docs/PLUGIN_LICENSE_SPEC.md`
 6. **Trial length** (2026-08-03): re-confirmed at 20 days after comparing
    the FabFilter 30-day norm; the constant is `TRIAL_DAYS` in
    `src/lib/licensing/license.ts`.
+7. **D-L1** (2026-08-03, escalated by the Poltergeist prep report): official
+   display name is **Poltergeist** (product id `poltergeist`);
+   "Spectral Ghost" remains the internal DSP-core codename only. HANDOFF-02
+   renames the user-data folder with a one-time migration.
+8. **D-L2** (2026-08-03, escalated by the Block Rotator prep report):
+   license files live in `<Documents>/Chrome Sphynx Audio/<Display Name>/`
+   on every OS (`cslic::defaultLicenseDir`), decoupled from preset storage.
+   Spec bumped to v1.3.
 
 Deviation from DEVELOPMENT_PLAN.md v1 noted: Phase 3 originally recommended a
 feature-limited demo (D6). Owner decision supersedes it with the 20-day
@@ -83,7 +91,8 @@ is preserved — the only online step is one-time trial/license *issuance*.
 ## Spec lineage & reconciliation (2026-08-03)
 
 An earlier spec exists at
-`csphxAudioVST3/csphxInstall_prompts/chrome-sphynx-license-spec.md` (v3),
+`csphxAudioVST3/csphxInstall_prompts/chrome-sphynx-license-spec.md` (v3, in
+the legacy dev directory),
 with a companion handoff prompt (`license-integration-claudecode-prompt.md`).
 It predates the owner decisions above and itself deferred Ed25519 to a
 "future v4". This design is that v4. Reconciliation:
@@ -109,8 +118,11 @@ Instead:
 
 1. Decisions and specs are finalized here (this doc + `PLUGIN_LICENSE_SPEC.md`).
 2. A **HandOff prompt** is written to `docs/handoffs/` and passed as the first
-   message to a Claude Code session opened in the target plugin project
-   (the owner creates safe clones of the development projects to receive it).
+   message to a Claude Code session opened in the target plugin project.
+   Since 2026-08-03 the RELEASE work directory is
+   `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/` (cslicense +
+   `XodBlockRotator_PLUGX`, `XodPoltergeist_PLUGX`, `XodBlockRotator_INSTALL`,
+   `XodPoltergeist_INSTALL`); `csphxAudioVST3/` is the legacy dev directory.
 3. Every handoff embeds: source-of-truth references, the exact tasks, a
    conflict rule ("raise and stop, never silently choose"), verification
    tests the target must run, and a report-back format this project uses to

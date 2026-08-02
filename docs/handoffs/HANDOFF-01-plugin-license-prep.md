@@ -1,5 +1,10 @@
 # HANDOFF-01 — Plugin License Integration: Preparation
 
+> **Status: executed 2026-08-03** for `XodBlockRotator_PLUGX` and
+> `XodPoltergeist_PLUGX` (reports in each repo's `docs/LICENSE_PREP_REPORT.md`,
+> tracked in `SYNC_LEDGER.md`). Kept as the template for future plugins.
+> Paths below reflect the RELEASE work directory `csphxAudioPLUGX/`.
+
 Issued by: **ChromeSphynxWeb** (company-wide master for e-commerce, licensing,
 and website integration). Target: one plugin project clone.
 Scope: **preparation only** — wire in the shared license module, prove
@@ -15,21 +20,22 @@ is reviewed.
 
 | Placeholder | Value | Example |
 |---|---|---|
-| `<TARGET_REPO>` | absolute path of the clone this session runs in | `~/XODMK/xodCode/csphxAudioVST3/xodBlockRotator_LIC` |
+| `<TARGET_REPO>` | absolute path of the clone this session runs in | `~/XODMK/xodCode/csphxAudioPLUGX/XodBlockRotator_PLUGX` |
 | `<CLONED_FROM>` | the development project it was cloned from | `xodBlockRotator_VST3MSTR` |
 | `<PLUGIN_DISPLAY_NAME>` | user-visible name (Title Case With Spaces) | `Block Rotator` |
 | `<PRODUCT_ID>` | licensing product id (kebab-case, from the master catalog) | `block-rotator` |
 
 ## Sources of truth (read before writing any code)
 
-1. `csphxAudioVST3/cslicense/` — the shared C++ license module (repo).
+1. `csphxAudioPLUGX/cslicense/` — the shared C++ license module (repo).
    Read `README.md` and `include/cslicense/cslicense.h`. Do **not** modify
    this repo; integration problems get reported back instead.
 2. `ChromeSphynxWeb/docs/PLUGIN_LICENSE_SPEC.md` **v1.2** — the integration
    contract (file format, state machine, storage, UI). Copy it into
    `<TARGET_REPO>/docs/` for reference.
-3. `csphxAudioVST3/csphxInstall_prompts/CSPHX_USER_DATA_STANDARD.md` — where
-   license files live on disk (beside `Presets/`).
+3. `csphxAudioVST3/csphxInstall_prompts/CSPHX_USER_DATA_STANDARD.md` (legacy
+   dev directory, still the canonical standard) — where license files live on
+   disk (beside `Presets/`).
 
 Ignore `csphxInstall_prompts/chrome-sphynx-license-spec.md` (v3) and
 `license-integration-claudecode-prompt.md` — both are SUPERSEDED (banners at

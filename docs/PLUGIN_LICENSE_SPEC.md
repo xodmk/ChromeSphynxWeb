@@ -1,9 +1,9 @@
-# Chrome Sphynx License — Plugin Integration Spec (v1.2)
+# Chrome Sphynx License — Plugin Integration Spec (v1.3)
 
 Audience: the C++/JUCE plugin repos (Block Rotator, Poltergeist).
 Issuer-side implementation and design rationale: this repo,
 `src/lib/licensing/license.ts` and `docs/LICENSING_DESIGN.md`.
-Reference C++ implementation: `csphxAudioVST3/cslicense/` (all §7 vectors pass).
+Reference C++ implementation: `csphxAudioPLUGX/cslicense/` (all §7 vectors pass).
 
 Lineage: supersedes `csphxInstall_prompts/chrome-sphynx-license-spec.md` v3
 (HMAC short serials, 5-day local trial, silence on expiry). Retained from v3:
@@ -73,17 +73,20 @@ the system clipboard contains both armor markers, offer a one-click
 
 **Secondary entry**: "Load license file" / drag-drop of a `.cslic` file.
 
-**License directory** (per `CSPHX_USER_DATA_STANDARD.md`, carried over from
-license-spec v3): the plugin's user-data root, beside `Presets/`:
+**License directory** (v1.3, decision D-L2 2026-08-03): licenses live in the
+Documents-based standard directory on **every OS**:
 
 ```
 <Documents>/Chrome Sphynx Audio/<Plugin Display Name>/
 ```
 
-The licensing module MUST obtain this path from the plugin's existing
-user-data helper (PresetManager base dir) — do not duplicate the path
-resolution. `cslic::defaultLicenseDir(displayName)` is the
-standard-conformant fallback for code without such a helper.
+obtained from `cslic::defaultLicenseDir(displayName)`. Each plugin exposes
+one public `getLicenseDirectory()` helper returning exactly this, used
+everywhere licensing touches disk. This is deliberately **decoupled from
+preset storage**, which may live elsewhere (e.g. Apple's presets tree on
+macOS): presets follow the preset helper, licenses follow this rule.
+(v1.2 said "obtain from the PresetManager helper"; that failed on macOS
+where Block Rotator's preset base is `~/Library/Audio/Presets/CSPHX/…`.)
 
 On plugin load, discover `*.cslic` files in that directory (first *valid*
 file wins; prefer `full` over `trial` when both are valid). Accepted licenses
