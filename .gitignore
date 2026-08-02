@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+
+# local trial-issuance ledger (dev store) and generated licenses
+.data/
+*.cslic
+
+# secrets
+.env
+.env.local
+.env*.local
+
+*.tsbuildinfo
