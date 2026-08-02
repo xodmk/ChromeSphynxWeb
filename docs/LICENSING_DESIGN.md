@@ -82,6 +82,21 @@ Companion spec for the plugin repos: `docs/PLUGIN_LICENSE_SPEC.md`
    license files live in `<Documents>/Chrome Sphynx Audio/<Display Name>/`
    on every OS (`cslic::defaultLicenseDir`), decoupled from preset storage.
    Spec bumped to v1.3.
+9. **Zero audio-thread impact** (owner directive 2026-08-03): licensing adds
+   zero CPU cost to real-time processing, modifies no DSP, and adds nothing
+   to `processBlock` beyond one relaxed atomic load folded into the existing
+   bypass early-return. Evaluation runs only at construction /
+   `prepareToPlay` / post-install; the gate is latched and never flips
+   during playback. Spec bumped to v1.4.
+
+   Correction record: the observation remains that expired plugins must pass
+   audio through dry (decision #3). What changes is the mechanism — the
+   click-free crossfade required by spec ≤v1.3 §4 and mandated in the
+   initial HANDOFF-02 issue induced per-block ramp/copy work on the audio
+   thread and is withdrawn; the latched gate makes ramping unnecessary
+   because state cannot change mid-playback. No incorrect code reached the
+   target repos' committed state (verified: both at their HANDOFF-01
+   commits with clean `plugin/` trees).
 
 Deviation from DEVELOPMENT_PLAN.md v1 noted: Phase 3 originally recommended a
 feature-limited demo (D6). Owner decision supersedes it with the 20-day

@@ -1,4 +1,11 @@
-# HANDOFF-02B — Poltergeist: License Integration
+# HANDOFF-02B — Poltergeist: License Integration (R1)
+
+> **Revision R1 (2026-08-03) — supersedes the initial issue.** The original
+> T4 mandated a license crossfade in `processBlock`; that violated the
+> zero-audio-thread-impact requirement and is withdrawn. If any session
+> started from the earlier revision, revert ALL `plugin/` source changes to
+> the HANDOFF-01 commit (`7767c80`) before starting. Spec is now **v1.4**
+> (latched gate, normative audio-thread budget).
 
 Issued by: **ChromeSphynxWeb** (master). Target session:
 `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/XodPoltergeist_PLUGX`
@@ -25,8 +32,10 @@ production key.
 ## Sources of truth
 
 1. `docs/PLUGIN_LICENSE_SPEC.md` — update your repo's copy from
-   `ChromeSphynxWeb/docs/PLUGIN_LICENSE_SPEC.md` (**v1.3**) first; v1.3 §3:
-   licenses live in `cslic::defaultLicenseDir("Poltergeist")` on every OS.
+   `ChromeSphynxWeb/docs/PLUGIN_LICENSE_SPEC.md` (**v1.4**) first; v1.3 §3:
+   licenses live in `cslic::defaultLicenseDir("Poltergeist")` on every OS;
+   v1.4 §4/§5: latched gate + normative audio-thread budget — read both
+   before coding.
 2. `../cslicense/` — shared module, already wired in. Do not modify it;
    report problems back. Record the SHA you build against.
 3. Your own `docs/LICENSE_PREP_REPORT.md` — the architecture notes below
@@ -58,21 +67,31 @@ Public `getLicenseDirectory()` returning
 preset base on Linux/Windows, but keep it a separate function per spec
 v1.3 (decoupled by design).
 
-### T3 — Processor-side license state
+### T3 — Processor-side license state (latched, spec §5)
 
-A `LicenseState` owner on `XodSpectralGhostProcessor`: evaluates via
+A `LicenseState` owner on `XodSpectralGhostProcessor`: calls
 `cslic::evaluate(getLicenseDirectory(), "poltergeist", kLicensePublicKey,
-std::time(nullptr))` at construction and on demand; publishes
-`std::atomic<bool> processingAllowed` (Licensed/TrialActive) + full
-`cslic::Status` behind a mutex for the GUI. `evaluate()` does filesystem
-I/O — message thread only (editor timer, T5, and after license install).
+std::time(nullptr))` in EXACTLY three places, all non-realtime — the
+processor constructor, `prepareToPlay`, and immediately after a successful
+`installLicenseText` (message thread). Latches
+`std::atomic<bool> processingAllowed` (Licensed/TrialActive) and caches the
+`cslic::Status` for the GUI (message-thread reads only). The gate never
+flips during playback; mid-session expiry affects only the GUI, enforcement
+lands at the next `prepareToPlay`. The one exception is the user unlocking.
 
-### T4 — Audio gate (dry passthrough, click-free)
+### T4 — Audio gate (zero audio-thread impact, spec §4 budget)
 
-In `XodSpectralGhostProcessor::processBlock` (PluginProcessor.cpp:180),
-gate on `processingAllowed` alongside the existing `"bypass"` early-return
-(:186-188 — already dry passthrough, but unramped). Implement a short
-linear crossfade (~30–50 ms) for license-gate transitions; leave the user
+In `XodSpectralGhostProcessor::processBlock` (PluginProcessor.cpp:180), the
+ONLY change is folding the latch into the existing `"bypass"` early-return
+(:186-188):
+
+```cpp
+if ((bypassParameter && bypassParameter->load())
+    || !licenseState.processingAllowed.load(std::memory_order_relaxed)) { return; }
+```
+
+Nothing else in `processBlock`, no ramps/crossfades/copies (unnecessary —
+the gate is latched), and zero changes to any DSP code. Leave the user
 bypass exactly as is.
 
 ### T5 — License panel UI (spec §4 + §3 entry)
@@ -86,18 +105,27 @@ Follow your editor's existing full-bounds child-overlay pattern
 - Panel: paste box → `cslic::installLicenseText`, clipboard auto-detect
   button (both armor markers present), "Load license file" + drag-drop,
   trial/buy URL buttons, inline error text on failure.
-- Re-check: reuse the editor's existing `timerCallback` at most once per
-  minute, respecting the documented "user interaction tracking to prevent
-  timer conflicts" block (PluginEditor.h:221); evaluate on editor
-  construction too.
+- GUI refresh is **display-only**: badge/panel read the processor's cached
+  `Status` and recompute remaining time from the cached payload's
+  `expiresAt` — never call `cslic::evaluate()` from the timer (no disk I/O
+  in GUI refresh). Reuse the editor's existing `timerCallback` (~once per
+  second is plenty), respecting the documented "user interaction tracking to
+  prevent timer conflicts" block (PluginEditor.h:221); read cached state on
+  editor construction too.
 
-### T6 — Tests
+### T6 — Tests + audio-thread diff audit
 
 Extend the GTest suite (temp dirs, pinned clocks, RFC key + spec §7
-vectors): gate false on empty dir; trial install → allowed; expired →
-blocked; full license → allowed with rollback flag; migration test from
-T1. The 9 pre-existing failures must remain byte-identical — zero new
-failures.
+vectors): gate false on empty dir; trial install → allowed; expired at next
+evaluate → blocked; full license → allowed with rollback flag; migration
+test from T1. The 9 pre-existing failures must remain byte-identical —
+zero new failures.
+
+**Diff audit (mandatory, goes in the report):**
+`git diff 7767c80 -- plugin/source/PluginProcessor.cpp` must show exactly
+two things — the one-line gate condition in the existing early-return, and
+the `evaluate` call in `prepareToPlay` (plus the member/include). Anything
+else in that file is out of budget.
 
 ### T7 — Report
 
@@ -108,5 +136,5 @@ message.
 
 ## Non-goals
 
-Production keys, installer/`plugin.config.sh`, website, DSP changes beyond
-the gate ramp, renaming source identifiers or repos.
+Production keys, installer/`plugin.config.sh`, website, ramps/crossfades of
+any kind, any DSP changes, renaming source identifiers or repos.

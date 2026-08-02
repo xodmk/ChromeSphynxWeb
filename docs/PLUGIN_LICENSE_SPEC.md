@@ -1,4 +1,4 @@
-# Chrome Sphynx License — Plugin Integration Spec (v1.3)
+# Chrome Sphynx License — Plugin Integration Spec (v1.4)
 
 Audience: the C++/JUCE plugin repos (Block Rotator, Poltergeist).
 Issuer-side implementation and design rationale: this repo,
@@ -107,9 +107,21 @@ equivalent used by u-he/FabFilter-class vendors.
 | `TrialExpired` | valid but expired `trial`, or rollback flag (§6) | **dry passthrough** (input copied to output, no processing) | locked panel: "Trial expired — Buy / Paste license / Load file" |
 | `Unlicensed` | no (valid) license file | dry passthrough | panel: "Start free 20-day trial / Buy / Paste license / Load file" |
 
-Dry passthrough must be click-free (apply the same ramp used for bypass).
-Never mute: a customer opening an old session must hear their track, just
-without the effect.
+Dry passthrough is implemented via the plugin's **existing** bypass-style
+early return in `processBlock` — never by new per-block processing. Never
+mute: a customer opening an old session must hear their track, just without
+the effect.
+
+**Audio-thread budget (v1.4, normative — zero CPU impact):** the entire
+audio-thread footprint of licensing is one relaxed `std::atomic<bool>` load
+folded into the existing early-return condition
+(`if (bypass || !processingAllowed) return;`). No ramps, no crossfades, no
+dry-buffer copies, no locks, no allocations, no file I/O, no other added
+work in `processBlock`, and no modification to the internal DSP. Click-free
+transition logic is unnecessary because the gate is latched (§5): its value
+never changes during continuous playback. (v1.3's "click-free ramp"
+requirement is withdrawn — it induced per-block crossfade machinery, which
+violates this budget.)
 
 UI styling (carried over from license-spec v3 §7): Licensed shows nothing —
 identical to a license-free plugin. TrialActive shows a small
@@ -120,11 +132,21 @@ while unlicensed. "Get your license" opens the store URL in the default
 browser. Serial auto-format from v3 does not apply — the paste box takes the
 whole armored block.
 
-## 5. Expiry check cadence
+## 5. Evaluation points & the latched gate (v1.4)
 
-Evaluate state on plugin instantiation and lazily at most once per minute on
-the UI timer thread (never the audio thread). Crossing the expiry boundary
-mid-session transitions to `TrialExpired` at the next check.
+`cslic::evaluate()` performs filesystem I/O and runs ONLY in non-realtime
+contexts: (a) plugin construction, (b) `prepareToPlay`, (c) immediately
+after a successful license install (message thread). The result latches
+`processingAllowed` (`std::atomic<bool>`) and caches the `cslic::Status`
+for the GUI.
+
+The gate is **latched**: it is never flipped during continuous playback.
+Crossing the expiry boundary mid-session updates only the GUI — the badge/
+panel recompute remaining time from the cached payload's `expiresAt` with no
+re-evaluation and no disk access — while audio enforcement takes effect at
+the next `prepareToPlay` / session reload. The single permitted mid-session
+gate change is the user-initiated unlock (install → re-evaluate → enable),
+where a one-time transition artifact is accepted.
 
 ## 6. Clock-rollback guard (trial only)
 

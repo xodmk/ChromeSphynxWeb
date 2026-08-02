@@ -10,8 +10,8 @@ RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/
 |---|---|---|---|---|---|
 | HANDOFF-01 | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `954b766` | **verified** 2026-08-03 | 119/119 tests; helper is private + macOS uses Apple presets tree (decision D-L2 below) |
 | HANDOFF-01 | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `954b766` | **verified** 2026-08-03 | 227 pass / 9 pre-existing fails (unchanged set); display name hardcoded "Spectral Ghost" (decision D-L1 below) |
-| HANDOFF-02A | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | — | issued (drafted 2026-08-03) | Integration: license panel + ramped dry-passthrough gate; spec v1.3 |
-| HANDOFF-02B | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | — | issued (drafted 2026-08-03) | Integration + D-L1 rename/migration; spec v1.3 |
+| HANDOFF-02A | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | — | **reissued R1** 2026-08-03 | Initial issue withdrawn (crossfade violated zero-audio-thread budget); R1 = latched gate, spec v1.4, diff audit |
+| HANDOFF-02B | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | — | **reissued R1** 2026-08-03 | Same correction + D-L1 rename/migration; spec v1.4 |
 | — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | no changes needed | Installer is license-agnostic; only PLUGIN_LICENSE_URL later |
 | — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | no changes needed | Same |
 
