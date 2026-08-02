@@ -1,8 +1,14 @@
-# Chrome Sphynx License — Plugin Integration Spec (v1.1)
+# Chrome Sphynx License — Plugin Integration Spec (v1.2)
 
-Audience: the C++/JUCE plugin repos (xodBlockRotator, Poltergeist).
+Audience: the C++/JUCE plugin repos (Block Rotator, Poltergeist).
 Issuer-side implementation and design rationale: this repo,
 `src/lib/licensing/license.ts` and `docs/LICENSING_DESIGN.md`.
+Reference C++ implementation: `csphxAudioVST3/cslicense/` (all §7 vectors pass).
+
+Lineage: supersedes `csphxInstall_prompts/chrome-sphynx-license-spec.md` v3
+(HMAC short serials, 5-day local trial, silence on expiry). Retained from v3:
+license storage per `CSPHX_USER_DATA_STANDARD.md` (§3) and the UI styling
+details (§4). See `docs/LICENSING_DESIGN.md` "Spec lineage & reconciliation".
 
 ## 1. File format (`.cslic`)
 
@@ -67,15 +73,22 @@ the system clipboard contains both armor markers, offer a one-click
 
 **Secondary entry**: "Load license file" / drag-drop of a `.cslic` file.
 
-On plugin load, discover licenses in (first *valid* file wins; prefer `full`
-over `trial` when both are valid):
+**License directory** (per `CSPHX_USER_DATA_STANDARD.md`, carried over from
+license-spec v3): the plugin's user-data root, beside `Presets/`:
 
-- macOS: `~/Library/Application Support/ChromeSphynx/*.cslic`
-- Windows: `%APPDATA%/ChromeSphynx/*.cslic`
-- Linux: `~/.config/csphx/*.cslic`
+```
+<Documents>/Chrome Sphynx Audio/<Plugin Display Name>/
+```
 
-Accepted licenses (pasted or loaded) are stored in that directory as
-`<product>.cslic` (trial: `<product>-trial.cslic`).
+The licensing module MUST obtain this path from the plugin's existing
+user-data helper (PresetManager base dir) — do not duplicate the path
+resolution. `cslic::defaultLicenseDir(displayName)` is the
+standard-conformant fallback for code without such a helper.
+
+On plugin load, discover `*.cslic` files in that directory (first *valid*
+file wins; prefer `full` over `trial` when both are valid). Accepted licenses
+(pasted or loaded) are stored there as `<product>.cslic` (trial:
+`<product>-trial.cslic`).
 
 Design note: a short typeable serial (`XXXX-XXXX-…`) is deliberately **not**
 supported — 64-byte Ed25519 signatures cannot fit one, and the symmetric
@@ -95,6 +108,15 @@ Dry passthrough must be click-free (apply the same ramp used for bypass).
 Never mute: a customer opening an old session must hear their track, just
 without the effect.
 
+UI styling (carried over from license-spec v3 §7): Licensed shows nothing —
+identical to a license-free plugin. TrialActive shows a small
+"TRIAL · N days remaining" pill in gold `#c8a23a` (amber + hours at ≤24h)
+beside a key-icon button that opens the license panel. TrialExpired /
+Unlicensed auto-open the panel when the editor opens; it is not dismissable
+while unlicensed. "Get your license" opens the store URL in the default
+browser. Serial auto-format from v3 does not apply — the paste box takes the
+whole armored block.
+
 ## 5. Expiry check cadence
 
 Evaluate state on plugin instantiation and lazily at most once per minute on
@@ -104,7 +126,8 @@ mid-session transitions to `TrialExpired` at the next check.
 ## 6. Clock-rollback guard (trial only)
 
 Persist a high-water wall-clock mark in the license directory
-(`state` file, plain text, epoch seconds): `hw = max(hw, now)` on every
+(`license-state.txt`, plain text, epoch seconds; rollback flag in
+`license-rollback.txt`): `hw = max(hw, now)` on every
 check. If `now < hw - 24h`, set a persistent `rollback` flag ⇒ state
 `TrialExpired` regardless of `expiresAt`. Full licenses ignore this entirely.
 The 24h tolerance forgives timezone/DST fixes; deleting the state file only

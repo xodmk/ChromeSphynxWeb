@@ -80,6 +80,44 @@ feature-limited demo (D6). Owner decision supersedes it with the 20-day
 time-limited trial; the "offline verification, no activation server" principle
 is preserved — the only online step is one-time trial/license *issuance*.
 
+## Spec lineage & reconciliation (2026-08-03)
+
+An earlier spec exists at
+`csphxAudioVST3/csphxInstall_prompts/chrome-sphynx-license-spec.md` (v3),
+with a companion handoff prompt (`license-integration-claudecode-prompt.md`).
+It predates the owner decisions above and itself deferred Ed25519 to a
+"future v4". This design is that v4. Reconciliation:
+
+| v3 element | Disposition |
+|---|---|
+| HMAC-SHA256 truncated serials (`BR-XXXXX-…`) | **Superseded** by Ed25519-signed key block (owner decision #1/#5). |
+| 5-day trial, auto-started locally on first run | **Superseded** by 20-day email-gated signed trial (#1/#6). |
+| Audio silenced on expiry (200 ms ramp) | **Superseded** by dry passthrough + locked GUI (#3). |
+| Future-timestamp anti-rollback check | **Superseded** by the 24 h high-water guard (spec §6). |
+| License storage per `CSPHX_USER_DATA_STANDARD.md` (`<Documents>/Chrome Sphynx Audio/<Plugin Display Name>/`, resolved via the plugin's PresetManager helper) | **Adopted** into spec v1.2 §3 and `cslicense`. |
+| UI styling: gold TRIAL pill, amber ≤24 h, key icon, auto-open non-dismissable panel on expiry, wrong-product status | **Adopted** into spec v1.2 §4 (paste box replaces the serial field). |
+
+Both v3 files carry SUPERSEDED banners pointing here. The installer template
+(`license_install/`) needs **no changes**: it is license-agnostic by design
+and only points users at `PLUGIN_LICENSE_URL`.
+
+## HandOff workflow (master-project process)
+
+This repo is the company-wide master for e-commerce, licensing, and website
+integration. Plugin-side changes are NOT made from this project directly.
+Instead:
+
+1. Decisions and specs are finalized here (this doc + `PLUGIN_LICENSE_SPEC.md`).
+2. A **HandOff prompt** is written to `docs/handoffs/` and passed as the first
+   message to a Claude Code session opened in the target plugin project
+   (the owner creates safe clones of the development projects to receive it).
+3. Every handoff embeds: source-of-truth references, the exact tasks, a
+   conflict rule ("raise and stop, never silently choose"), verification
+   tests the target must run, and a report-back format this project uses to
+   track sync status.
+4. This project keeps a per-plugin sync ledger (handoff issued → completed →
+   verified) as handoffs are executed.
+
 ## System design
 
 ### One format, two license types
