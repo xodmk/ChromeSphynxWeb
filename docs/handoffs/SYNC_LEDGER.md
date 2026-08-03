@@ -13,8 +13,10 @@ RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/
 | HANDOFF-02A | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `f3d6114` | **verified** 2026-08-03 | R1 latched gate delivered; 126/126 tests; Release VST3 links (19 `cslic::` syms); diff audit = 2 hunks, no DSP change. Host UI check outstanding † |
 | HANDOFF-02B | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `f3d6114` | **verified** 2026-08-03 | R1 latched gate delivered; 249/258 (9 pre-existing fails unchanged), 16/16 licensing; Release VST3 re-verified under HANDOFF-03 — it did **not** link before `d2c0006`. Host UI check outstanding † |
 | HANDOFF-03 | master (report back) | — | `f3d6114` | **reported** 2026-08-03 | cslicense PIC fix; both plugins re-verified from clean trees; 3 upstream items + 4 open decisions |
-| — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | no changes needed | Installer is license-agnostic; only PLUGIN_LICENSE_URL later |
-| — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | no changes needed | Same |
+| HANDOFF-04A | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` **+ `_INSTALL`** | n/a | **issued** 2026-08-03 | D-L1 finish: customer docs (34 occurrences, product-vs-feature split) + D-N1 `PRODUCT_NAME` rename + installer upstream keys; VST3 UID measured first |
+| HANDOFF-04B | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` **+ `_INSTALL`** | n/a | **issued** 2026-08-03 | D-N1 naming only (docs already clean); same UID check, measured independently |
+| — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | changed by 04B only | Still license-agnostic; 04B updates the two upstream bundle keys; PLUGIN_LICENSE_URL later |
+| — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | changed by 04A only | Same |
 
 † **Scope of "verified" for 02A/02B.** Covers what was measured: clean-tree
 Release VST3 links with `cslic::` symbols present, full ctest suites, and the
@@ -47,6 +49,20 @@ targets (HANDOFF-03 action 3).
   `<Documents>/Chrome Sphynx Audio/<Display Name>/` on **every OS** via
   `cslic::defaultLicenseDir`, decoupled from preset storage
   (macOS presets stay in the Apple tree). Spec bumped to **v1.3**.
+- **D-N1 (host-visible product name, 2026-08-03)**: `PRODUCT_NAME` must be
+  the product, not the `xod` codename — `"Poltergeist"` and
+  `"BlockRotator"`. Carried by HANDOFF-04A/04B, each of which measures the
+  VST3 class ID before and after, because the rename may change the plugin's
+  VST3 UID and is only free pre-release. `PLUGIN_CODE` /
+  `PLUGIN_MANUFACTURER_CODE`, source identifiers, user-data folders and
+  `kPluginDisplayName` are all unaffected.
+
+  Correction to the earlier record: the installers **already** stage the
+  build output under the correct customer-facing name
+  (`Poltergeist.vst3` / `BlockRotator.vst3` via `PLUGIN_BUNDLE_NAME`), so the
+  installed *file* was never wrong. Only the name compiled into the binary
+  (`JucePlugin_Name`, what hosts display) is. The installer change is
+  therefore two data keys, not a code change.
 
 ## As-built record
 
@@ -67,13 +83,12 @@ not forward (✦). Full context in the implementation record.
   preset/license coupling D-L2 removed).
 - Settle the glue divergence before a third plugin: `Licensing/` subdir vs
   flat headers, `evaluateAndLatch()` vs `refresh()`.
-- ✦ **D-L1 contradicted in shipped docs**: 34 "Spectral Ghost" occurrences
-  across Poltergeist's UserGuide/QuickStart/ProductPage, including install
-  instructions. Unresolved and customer-facing.
-- ✦ **DAW-visible name is the codename in both plugins**
-  (`PRODUCT_NAME "xodPoltergeist"` / `"xodBlockRotator"`); changing it
-  renames the artifact that each installer's `prepare-plugin.sh` detects, so
-  it is a coordinated plugin+installer decision.
+- ~~✦ **D-L1 contradicted in shipped docs**~~ — **issued as HANDOFF-04A**
+  (34 occurrences; the split between product references and the "Spectral
+  Ghost Delay" *feature* name is specified in the handoff, since a blanket
+  replace would rename a feature).
+- ~~✦ **DAW-visible name is the codename in both plugins**~~ — **decided as
+  D-N1, issued as HANDOFF-04A/04B.**
 - ✦ **Handoff wording defect — FIXED 2026-08-03**: the diff-audit task said
   the processor diff must show "exactly two things" while T2/T3 and spec §5
   mandate three evaluation points. Corrected in HANDOFF-02A/02B.

@@ -138,16 +138,21 @@ HANDOFF-03 did not forward (marked ✦):
   passes on Linux only because the paths coincide, already skips on macOS. Left
   passing pending a decision.
 - **Settle the glue divergence** (items 1–4 above) before a third plugin.
-- ✦ **D-L1 is contradicted by shipped customer documentation.** Poltergeist's
-  `SpectralGhost_UserGuide.md` (22), `_QuickStart.md` (6) and `_ProductPage.md`
-  (6) — 34 occurrences — still call the product "Spectral Ghost", including
-  install instructions. Out of scope for HANDOFF-02B, unresolved, and it ships
-  with the product. Block Rotator's own docs are clean.
-- ✦ **The DAW-visible plugin name is the `xod`-prefixed codename in both
-  plugins** — `PRODUCT_NAME "xodPoltergeist"` and `"xodBlockRotator"`. Changing
-  it renames the built artifact, which each `*_INSTALL` project's
-  `prepare-plugin.sh` auto-detects, so this is a coordinated plugin+installer
-  decision, not a plugin-local one.
+- ~~✦ **D-L1 is contradicted by shipped customer documentation**~~ — **issued
+  as HANDOFF-04A** (2026-08-03). Poltergeist's `SpectralGhost_UserGuide.md`
+  (22), `_QuickStart.md` (6) and `_ProductPage.md` (6). Note for whoever
+  reviews the result: these are not all product references — §9's "Spectral
+  Ghost Delay" is a *feature* name, retargeted to "Ghost Delay" to match the
+  existing `GhostDelay` preset bank and `Ghost *` control vocabulary.
+  Block Rotator's own docs are clean.
+- ~~✦ **The DAW-visible plugin name is the `xod`-prefixed codename in both
+  plugins**~~ — **decided as D-N1, issued as HANDOFF-04A/04B** (2026-08-03).
+  Correction to this record's earlier wording: the installers already stage
+  the artifact under the correct name via `PLUGIN_BUNDLE_NAME`
+  (`Poltergeist.vst3` / `BlockRotator.vst3`), so the installed file was never
+  wrong — only `JucePlugin_Name` inside the binary. The installer side is two
+  `PLUGIN_UPSTREAM_*` data keys. Each handoff measures the VST3 class ID
+  before and after, since the rename may shift the VST3 UID.
 - ✦ **HANDOFF-02A/02B contained a wording defect** (corrected 2026-08-03): the
   diff-audit task said the `PluginProcessor.cpp` diff must show "exactly two
   things", while T2/T3 and spec §5 mandate three evaluation points including
