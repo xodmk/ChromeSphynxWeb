@@ -10,11 +10,19 @@ RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/
 |---|---|---|---|---|---|
 | HANDOFF-01 | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `954b766` | **verified** 2026-08-03 | 119/119 tests; helper is private + macOS uses Apple presets tree (decision D-L2 below) |
 | HANDOFF-01 | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `954b766` | **verified** 2026-08-03 | 227 pass / 9 pre-existing fails (unchanged set); display name hardcoded "Spectral Ghost" (decision D-L1 below) |
-| HANDOFF-02A | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `f3d6114` | **reported** 2026-08-03 | R1 latched gate delivered; 126/126 tests; Release VST3 links (19 `cslic::` syms); diff audit = 2 hunks, no DSP change |
-| HANDOFF-02B | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `f3d6114` | **reported** 2026-08-03 | R1 latched gate delivered; 249/258 (9 pre-existing fails unchanged), 16/16 licensing; Release VST3 re-verified under HANDOFF-03 — it did **not** link before `d2c0006` |
+| HANDOFF-02A | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `f3d6114` | **verified** 2026-08-03 | R1 latched gate delivered; 126/126 tests; Release VST3 links (19 `cslic::` syms); diff audit = 2 hunks, no DSP change. Host UI check outstanding † |
+| HANDOFF-02B | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `f3d6114` | **verified** 2026-08-03 | R1 latched gate delivered; 249/258 (9 pre-existing fails unchanged), 16/16 licensing; Release VST3 re-verified under HANDOFF-03 — it did **not** link before `d2c0006`. Host UI check outstanding † |
 | HANDOFF-03 | master (report back) | — | `f3d6114` | **reported** 2026-08-03 | cslicense PIC fix; both plugins re-verified from clean trees; 3 upstream items + 4 open decisions |
 | — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | no changes needed | Installer is license-agnostic; only PLUGIN_LICENSE_URL later |
 | — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | no changes needed | Same |
+
+† **Scope of "verified" for 02A/02B.** Covers what was measured: clean-tree
+Release VST3 links with `cslic::` symbols present, full ctest suites, and the
+audio-thread diff audit (one relaxed atomic load in the pre-existing early
+return; no DSP file touched). It does **not** cover manual verification of the
+four spec §4 UI states in a DAW — neither report claims it, and both describe
+what the code draws rather than what a host renders. Production key and store
+URLs also remain `TODO(release)` placeholders in both repos.
 
 Shared-module reference: `csphxAudioPLUGX/cslicense` @ **`f3d6114`**
 (`954b766` → `d2c0006` PIC → `f3d6114` test option + doc refresh). Runtime
