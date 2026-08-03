@@ -112,10 +112,18 @@ next evaluate → blocked; full license → allowed with rollback flag present.
 All 119 existing ctest entries must still pass.
 
 **Diff audit (mandatory, goes in the report):**
-`git diff 396724d -- plugin/source/PluginProcessor.cpp` must show exactly
-two things — the one-line gate condition in the existing early-return, and
-the `evaluate` call in `prepareToPlay` (plus the member/include). Anything
-else in that file is out of budget.
+`git diff 396724d -- plugin/source/PluginProcessor.cpp` must show only the
+licensing wiring T2/T3 call for, and nothing else:
+
+- the one-line gate condition folded into the existing early-return;
+- the non-realtime `evaluate` calls from T2's three §5 points that land in
+  this file — `prepareToPlay` always, plus the processor constructor **if**
+  construction-time evaluation is an explicit call rather than implicit in
+  `LicenseState`'s own constructor (either is fine; say which you did);
+- the member declaration and include in `PluginProcessor.h`.
+
+Anything beyond that in this file — especially anything inside
+`processBlock` other than the atomic load — is out of budget.
 
 ### T6 — Report
 

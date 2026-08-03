@@ -39,3 +39,36 @@ targets (HANDOFF-03 action 3).
   `<Documents>/Chrome Sphynx Audio/<Display Name>/` on **every OS** via
   `cslic::defaultLicenseDir`, decoupled from preset storage
   (macOS presets stay in the Apple tree). Spec bumped to **v1.3**.
+
+## As-built record
+
+What actually landed in each plugin — files, classes, diffs, test counts,
+divergences, and what is verified vs inferred — is recorded master-side in
+[`PLUGIN_IMPLEMENTATION_RECORD.md`](PLUGIN_IMPLEMENTATION_RECORD.md),
+compiled 2026-08-03 from both integration reports plus direct repo
+inspection. Per-repo detail stays in each plugin's
+`docs/LICENSE_INTEGRATION_REPORT.md`.
+
+## Open items owned by master (2026-08-03)
+
+From HANDOFF-03, plus items the plugin reports raised that HANDOFF-03 did
+not forward (✦). Full context in the implementation record.
+
+- Retire or re-scope Block Rotator's
+  `LicensePrep.UserDataHelperAgreesWithDefaultLicenseDir` (asserts the
+  preset/license coupling D-L2 removed).
+- Settle the glue divergence before a third plugin: `Licensing/` subdir vs
+  flat headers, `evaluateAndLatch()` vs `refresh()`.
+- ✦ **D-L1 contradicted in shipped docs**: 34 "Spectral Ghost" occurrences
+  across Poltergeist's UserGuide/QuickStart/ProductPage, including install
+  instructions. Unresolved and customer-facing.
+- ✦ **DAW-visible name is the codename in both plugins**
+  (`PRODUCT_NAME "xodPoltergeist"` / `"xodBlockRotator"`); changing it
+  renames the artifact that each installer's `prepare-plugin.sh` detects, so
+  it is a coordinated plugin+installer decision.
+- ✦ **Handoff wording defect — FIXED 2026-08-03**: the diff-audit task said
+  the processor diff must show "exactly two things" while T2/T3 and spec §5
+  mandate three evaluation points. Corrected in HANDOFF-02A/02B.
+- Neither panel has had human/DAW visual review; zero-CPU-impact is
+  structural, not profiled.
+- Production key and store URLs are still `TODO(release)` in both repos.
