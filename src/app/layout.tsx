@@ -1,3 +1,22 @@
+import type { Metadata } from 'next'
+import { SITE_URL } from '../lib/site'
+
+const description = 'Professional VST3 Plugins for Abstract Sound Design'
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: 'Chrome Sphynx Audio',
+  description,
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'Chrome Sphynx Audio',
+    description,
+    url: '/',
+    siteName: 'Chrome Sphynx Audio',
+    type: 'website',
+  },
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -6,8 +25,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Chrome Sphynx Audio</title>
-        <meta name="description" content="Professional VST3 Plugins for Abstract Sound Design" />
         <style>{`
           /* Reset and base styles */
           * { margin: 0; padding: 0; box-sizing: border-box; }

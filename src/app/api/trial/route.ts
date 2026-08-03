@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server';
 import { TRIAL_DAYS, issueLicense, trialPayload } from '@/lib/licensing/license';
 import { PRODUCTS, isProductId } from '@/lib/licensing/products';
 import { hasTrial, normalizeEmail, recordTrial } from '@/lib/licensing/store';
+import { SUPPORT_EMAIL, absoluteUrl } from '@/lib/site';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -84,7 +85,7 @@ async function sendTrialEmail(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: process.env.CS_LICENSE_EMAIL_FROM ?? 'Chrome Sphynx Audio <licenses@chromesphynx.com>',
+      from: process.env.CS_LICENSE_EMAIL_FROM ?? `Chrome Sphynx Audio <${SUPPORT_EMAIL}>`,
       to: [email],
       subject: `Your ${productName} trial license (${TRIAL_DAYS} days)`,
       text:
@@ -94,6 +95,8 @@ async function sendTrialEmail(
         `\nCopy the whole block above — including the BEGIN and END lines — and ` +
         `paste it into the plugin's license panel. The same license is attached ` +
         `as a file if you prefer "Load license file".\n\n` +
+        `Lost it? Retrieve it any time at ${absoluteUrl('/account')}\n` +
+        `Need help? ${SUPPORT_EMAIL}\n\n` +
         `— Chrome Sphynx Audio`,
       attachments: [
         {
