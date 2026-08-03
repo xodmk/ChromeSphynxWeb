@@ -91,17 +91,37 @@ none licensing, unchanged from before this work.
 
 ## Action required from master
 
-1. **Update `SYNC_LEDGER.md`** to `d2c0006` (done in this change; please confirm).
-2. **`cslicense.h`'s header comment is stale on two counts** — it says the module
-   implements spec **v1.1**, and the doc comment on `defaultLicenseDir()` still
-   gives v1.2 guidance ("callers should pass the PresetManager base dir"), which
-   D-L2 reversed in v1.3. The code is correct; only the comments mislead. Left
-   unfixed — this report does not assume standing permission to edit cslicense.
-3. **`cslicense_tests` is still guarded by `if(PROJECT_IS_TOP_LEVEL)`**, so no
-   consumer using `add_subdirectory()` can build it. Both plugin repos work around
-   this by declaring a duplicate target from cslicense's own test source. Since the
-   PIC precedent is set, consider dropping the guard or replacing it with
-   `option(CSLICENSE_BUILD_TESTS ...)`.
+1. **Update `SYNC_LEDGER.md`** to `f3d6114` (done in this change; please confirm).
+
+Items 2 and 3 below were raised here and then **actioned on owner instruction**
+(2026-08-03) rather than left for master. Recorded for the trail.
+
+2. ~~**`cslicense.h`'s header comment is stale on two counts**~~ — **DONE**
+   (`f3d6114`). It claimed spec **v1.1**, and the doc comment on
+   `defaultLicenseDir()` still gave v1.2 guidance ("callers should pass the
+   PresetManager base dir"), which D-L2 reversed in v1.3. Both corrected: the
+   header now states v1.4, lists the v1.3/v1.4 deltas it already satisfies, and
+   documents `defaultLicenseDir()` as the **canonical** location rather than a
+   fallback — with the macOS reason it must not be substituted. The README carried
+   the same stale advice plus "re-check on a UI timer", which v1.4 §5 replaced with
+   the latched model; it now documents the three non-realtime evaluation points and
+   states that `evaluate()` is not realtime-safe. Comments/docs only — no code
+   changed, so no licensing behaviour was re-verified beyond rebuilds.
+
+3. ~~**`cslicense_tests` is still guarded by `if(PROJECT_IS_TOP_LEVEL)`**~~ —
+   **DONE** (`f3d6114`). Replaced with
+   `option(CSLICENSE_BUILD_TESTS "..." ${PROJECT_IS_TOP_LEVEL})`, which preserves
+   the previous standalone default while letting consumers opt in with
+   `-DCSLICENSE_BUILD_TESTS=ON`. **Both plugin repos have had their duplicate
+   targets deleted**; each root `CMakeLists.txt` now sets the option whenever
+   `BUILD_UNIT_TESTS` is on, and both retain
+   `add_dependencies(plugin_tests cslicense_tests)` because `build_utest.sh`
+   builds only `--target plugin_tests`.
+
+   Re-verified after the change, from deleted build trees: Block Rotator
+   **126/126** with `cslicense_tests` passing; Poltergeist **249/258** with
+   `cslicense_tests` passing and the same 9 pre-existing failures; cslicense
+   standalone `cmake && ctest` still passes.
 
 ## Open decisions carried forward
 
