@@ -159,10 +159,11 @@ export default function RootLayout({
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
           }
 
+          /* Artwork is near-square (~966x938); a fixed height would crop it. */
           .plugin-image {
             width: 100%;
-            height: 250px;
-            object-fit: cover;
+            height: auto;
+            display: block;
           }
 
           .card-image { 
