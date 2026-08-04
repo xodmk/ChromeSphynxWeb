@@ -1,12 +1,12 @@
-// POST /api/trial — issue a 20-day trial license, one per (email, product).
+// POST /api/trial — issue a 20-day trial licence, one per (email, product).
 // Delivery: emailed via Resend when RESEND_API_KEY is set; otherwise (dev)
-// the license is returned in the response body so the flow is testable.
+// the licence is returned in the response body so the flow is testable.
 
 import { NextResponse } from 'next/server';
 import { TRIAL_DAYS, issueLicense, trialPayload } from '@/lib/licensing/license';
 import { PRODUCTS, isProductId } from '@/lib/licensing/products';
-import { hasTrial, normalizeEmail, recordTrial } from '@/lib/licensing/store';
-import { SUPPORT_EMAIL, absoluteUrl } from '@/lib/site';
+import { getStore, normalizeEmail } from '@/lib/licensing/store';
+import { sendLicenseEmail } from '@/lib/licensing/email';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -45,7 +45,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unknown product.' }, { status: 400 });
   }
 
-  if (hasTrial(email, product)) {
+  const store = getStore();
+  if (await store.hasTrial(email, product)) {
     return NextResponse.json(
       { error: 'A trial for this product has already been issued to this email.' },
       { status: 409 },
@@ -54,57 +55,27 @@ export async function POST(req: Request) {
 
   const payload = trialPayload(product, email);
   const license = issueLicense(payload, privateKey);
-  recordTrial({ email, product, issuedAt: payload.issuedAt });
+  await store.recordTrial({ email, product, issuedAt: payload.issuedAt });
 
   if (process.env.RESEND_API_KEY) {
-    const sent = await sendTrialEmail(email, product, license, payload.expiresAt!);
-    if (!sent) {
+    const productName = PRODUCTS.find((p) => p.id === product)?.name ?? product;
+    const sent = await sendLicenseEmail({
+      to: email,
+      productId: product,
+      productName,
+      license,
+      expiresAt: payload.expiresAt,
+    });
+    if (sent === 'failed') {
       return NextResponse.json({ error: 'Could not send the license email.' }, { status: 502 });
     }
     return NextResponse.json({ sent: true, trialDays: TRIAL_DAYS });
   }
+
   return NextResponse.json({
     sent: false,
     trialDays: TRIAL_DAYS,
     expiresAt: payload.expiresAt,
     license,
   });
-}
-
-async function sendTrialEmail(
-  email: string,
-  product: string,
-  license: string,
-  expiresAt: string,
-): Promise<boolean> {
-  const productName = PRODUCTS.find((p) => p.id === product)?.name ?? product;
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: process.env.CS_LICENSE_EMAIL_FROM ?? `Chrome Sphynx Audio <${SUPPORT_EMAIL}>`,
-      to: [email],
-      subject: `Your ${productName} trial license (${TRIAL_DAYS} days)`,
-      text:
-        `Thanks for trying ${productName}.\n\n` +
-        `Your ${TRIAL_DAYS}-day trial license (expires ${expiresAt}):\n\n` +
-        license +
-        `\nCopy the whole block above — including the BEGIN and END lines — and ` +
-        `paste it into the plugin's license panel. The same license is attached ` +
-        `as a file if you prefer "Load license file".\n\n` +
-        `Lost it? Retrieve it any time at ${absoluteUrl('/account')}\n` +
-        `Need help? ${SUPPORT_EMAIL}\n\n` +
-        `— Chrome Sphynx Audio`,
-      attachments: [
-        {
-          filename: `ChromeSphynx-${product}-trial.cslic`,
-          content: Buffer.from(license, 'utf8').toString('base64'),
-        },
-      ],
-    }),
-  });
-  return res.ok;
 }

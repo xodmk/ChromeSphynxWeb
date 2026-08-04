@@ -4,6 +4,9 @@
 // the endpoint cannot be used to discover who owns a licence.
 
 import { NextResponse } from 'next/server';
+import { PRODUCTS } from '@/lib/licensing/products';
+import { getStore, normalizeEmail } from '@/lib/licensing/store';
+import { sendLicenseEmail } from '@/lib/licensing/email';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -26,15 +29,22 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json().catch(() => null);
-  const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const email = typeof body?.email === 'string' ? normalizeEmail(body.email) : '';
   if (!EMAIL_RE.test(email)) {
     return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
   }
 
-  // TODO(launch): look the address up in the durable order/trial store and
-  // re-send each licence found. Blocked on the same store that replaces the
-  // dev file store in src/lib/licensing/store.ts — see docs/LICENSING_DESIGN.md
-  // "Before launch". Until then the endpoint accepts the request and tells the
-  // customer to email support, rather than silently doing nothing.
-  return NextResponse.json({ ok: true, pending: true });
+  const licenses = await getStore().listByEmail(email);
+  for (const issued of licenses) {
+    const productName = PRODUCTS.find((p) => p.id === issued.product)?.name ?? issued.product;
+    await sendLicenseEmail({
+      to: email,
+      productId: issued.product,
+      productName,
+      license: issued.license,
+    });
+  }
+
+  // Same response either way — never reveal whether the address is known.
+  return NextResponse.json({ ok: true });
 }
