@@ -214,8 +214,39 @@ No DSP or installer changes anywhere below; effort assumes one developer.
 
 ### Before launch (hard requirements)
 
-1. Durable issuance store replacing the `.data/` file store (L1).
-2. Email provider + domain auth (L2); set `CS_LICENSE_EMAIL_FROM`.
-3. Generate the production keypair (L4) and set env vars in Vercel.
-4. End-to-end test: request trial → receive email → load file in plugin →
+1. ~~Durable issuance store~~ — **built** (2026-08-04). Postgres backend in
+   `store-postgres.ts`, selected whenever `DATABASE_URL` is set; schema in
+   `schema.sql`, applied with `npm run db:migrate`. Remaining: provision the
+   database (any Postgres — Neon, Supabase), use the **pooled** connection
+   string, and set `DATABASE_URL` in Vercel. Without it the app falls back to
+   the ephemeral file store and logs a warning in production.
+2. Email provider + domain auth (L2); set `CS_LICENSE_EMAIL_FROM`. Note the
+   domain has exactly one SPF TXT record — Cloudflare Email Routing already
+   created one, so Resend's `include:` must be **merged into it**, not added
+   as a second record.
+3. Generate the production keypair (L4) and set env vars in Vercel. Then
+   issue a handoff to swap the RFC test key in both plugins' `LicenseConfig.h`.
+4. Paddle: create the catalog, set `PADDLE_WEBHOOK_SECRET_KEY`,
+   `PADDLE_API_KEY`, and `CS_PADDLE_PRODUCT_MAP` (Paddle price/product id →
+   our product id), and point a notification destination at
+   `/api/webhooks/paddle` for `transaction.completed`.
+5. End-to-end test: request trial → receive email → load file in plugin →
    expiry behavior at +20 days (with a short-expiry test license).
+
+### Purchase fulfilment (built 2026-08-04)
+
+`/api/webhooks/paddle` verifies the signature (HMAC-SHA256 over
+`${ts}:${rawBody}`, timing-safe compare, timestamp tolerance), claims the
+event id so a retry cannot mint a second licence, resolves our product id
+from the configured map, issues a perpetual licence through the same
+`issueLicense()` the trial uses, records the order, and emails it.
+
+Failure policy: 403 for a bad signature; 200 for events we ignore (a
+permanent 4xx would make Paddle retry forever); 500 only for faults a retry
+can fix — the licence is recorded *before* the email, so a retry re-sends
+without re-issuing.
+
+Verified end-to-end against a running server with genuinely signed payloads:
+the issued licence verifies against its public key; duplicate delivery is
+refused; forged signature, tampered body, and stale timestamp are all
+rejected.
