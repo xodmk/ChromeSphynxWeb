@@ -1,0 +1,56 @@
+{
+  "slug": "poltergeist",
+  "productId": "poltergeist",
+  "name": "Poltergeist",
+  "tagline": "A spectral effects processor that haunts, warps, and decays",
+  "summary": "A real-time phase vocoder that deconstructs audio into spectral frames and rebuilds it — pitch shifting, frequency warping, comb resonance, and a frequency-domain Ghost Delay with gated feedback.",
+  "price": "$79",
+  "currency": "USD",
+  "image": "/gfx/CSPHX_Poltergeist_GorgulanFace.png",
+  "gallery": [
+    "/gfx/CSPHX_Poltergeist_GorgulanFace.png",
+    "/gfx/CSPHX_Poltergeist_SeijinFace.png",
+    "/gfx/CSPHX_Poltergeist_SmokeFace.png"
+  ],
+  "highlights": [
+    {
+      "title": "Phase Vocoder Spectral Engine",
+      "body": "A real-time STFT phase vocoder deconstructs audio into frequency-domain frames, transforms magnitude and phase directly, then resynthesizes. Two modes: High Resolution (1024-sample window) for maximum detail, Low Latency (512-sample) for tighter response."
+    },
+    {
+      "title": "Ghost Delay",
+      "body": "The defining feature — a frame delay that stores and replays entire spectral frames rather than audio samples. Echoes repeat with full pitch fidelity, without the smearing of conventional delays."
+    },
+    {
+      "title": "Spectral Warp & Shift with Morph Crossfade",
+      "body": "Spectral Shift applies a Bode-style linear frequency offset, dissolving harmonic relationships into metallic, inharmonic textures. Spectral Warp remaps the frequency axis nonlinearly, stretching lows against highs for formant-like and alien vocal transformations. Morph crossfades continuously between them."
+    },
+    {
+      "title": "Spectral Gate",
+      "body": "Rhythmic gating across the Ghost Delay, from 20 ms tremolo flutter to two-second pulses, with an intensity ramp and tempo sync to your DAW."
+    },
+    {
+      "title": "Bode Frequency Shift on the Feedback Path",
+      "body": "Each delay repetition is frequency-shifted again, so echoes drift progressively further from the source — accumulating spectral drift that spirals rather than repeats."
+    },
+    {
+      "title": "Spectral Wavefold & Comb Filter",
+      "body": "A spectral-domain wavefold stage adds harmonic grit directly to the spectral data, feeding a resonant spectral comb filter for metallic, tuned resonance."
+    }
+  ],
+  "specs": [
+    ["Effect type", "STFT phase vocoder spectral processor"],
+    ["STFT modes", "High Resolution (1024) / Low Latency (512)"],
+    ["Spectral stages", "Pitch shift, wavefold, comb, shift/warp, frame delay, gate"],
+    ["Modulation", "Parameter morphing crossfader, tempo sync, host automation"],
+    ["Presets", "Factory banks plus unlimited user presets"],
+    ["Processing", "64-bit internal, SIMD-accelerated"]
+  ],
+  "formats": ["VST3 (macOS, Windows, Linux)", "AU (macOS)"],
+  "requirements": [
+    "A DAW that supports VST3 plugins (or AU on macOS)",
+    "macOS 11 (Big Sur) or later (Intel or Apple Silicon), Windows, or Linux",
+    "Multi-core CPU recommended when visualization is enabled"
+  ],
+  "audience": "Sound designers and producers working in spectral territory — granular and glitch textures, cinematic transitions, haunted ambience, and impossible vocal transformations."
+}

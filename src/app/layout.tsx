@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { SITE_URL } from '../lib/site'
+import SiteNav from './components/SiteNav'
+import SiteFooter from './components/SiteFooter'
 
 const description = 'Professional VST3 Plugins for Abstract Sound Design'
 
@@ -437,10 +439,157 @@ export default function RootLayout({
             color: #ffffff;
           }
 
+          /* Site navigation */
+          .site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #262626;
+          }
+
+          .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+            padding-top: 0.9rem;
+            padding-bottom: 0.9rem;
+            flex-wrap: wrap;
+          }
+
+          .nav-brand {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+          }
+
+          .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+          }
+
+          .nav-link {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 0.92rem;
+            transition: color 0.2s ease;
+          }
+
+          .nav-link:hover { color: #ffffff; }
+
+          /* Long-form pages: legal, support, product detail */
+          .prose {
+            max-width: 760px;
+            margin: 0 auto;
+            color: #d1d5db;
+          }
+
+          .prose h1 {
+            font-size: 2.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.75rem;
+          }
+
+          .prose h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin: 2.25rem 0 0.75rem;
+          }
+
+          .prose p, .prose li { line-height: 1.75; margin-bottom: 0.9rem; }
+          .prose ul { margin: 0 0 1rem 1.25rem; }
+          .prose a { color: #a5b4fc; }
+
+          .prose-meta {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+          }
+
+          .todo-token {
+            background: rgba(234, 179, 8, 0.12);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+            color: #fde68a;
+            border-radius: 0.4rem;
+            padding: 0.1rem 0.4rem;
+            font-family: monospace;
+            font-size: 0.85em;
+          }
+
+          /* Product detail */
+          .product-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 3rem;
+            align-items: center;
+          }
+
+          .product-hero img {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid #262626;
+          }
+
+          .product-tagline {
+            font-size: 1.25rem;
+            color: #a1a1aa;
+            margin-bottom: 1.25rem;
+          }
+
+          .buy-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1.75rem 0;
+          }
+
+          .price-tag {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #10b981;
+          }
+
+          .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+          }
+
+          .spec-table td {
+            padding: 0.65rem 0;
+            border-bottom: 1px solid #262626;
+            vertical-align: top;
+          }
+
+          .spec-table td:first-child {
+            color: #9ca3af;
+            width: 40%;
+            padding-right: 1rem;
+          }
+
+          .highlight-item { margin-bottom: 1.75rem; }
+
+          .highlight-item h3 {
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 0.4rem;
+          }
+
+          .highlight-item p { color: #9ca3af; line-height: 1.7; }
+
           /* Responsive design */
           @media (max-width: 768px) {
             .main-title { font-size: 2.5rem; }
-            .main-logo { 
+            .main-logo {
               max-width: min(90vw, 400px);
               max-height: min(50vh, 300px);
             }
@@ -448,11 +597,15 @@ export default function RootLayout({
             .grid { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .testimonials-grid { grid-template-columns: 1fr; }
+            .product-hero { grid-template-columns: 1fr; gap: 2rem; }
+            .nav-inner { justify-content: center; }
           }
         `}</style>
       </head>
       <body>
+        <SiteNav />
         {children}
+        <SiteFooter />
       </body>
     </html>
   )

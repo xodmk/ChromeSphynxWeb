@@ -1,0 +1,57 @@
+{
+  "slug": "block-rotator",
+  "productId": "block-rotator",
+  "name": "Block Rotator",
+  "tagline": "A reverb that breathes, mutates, and orbits",
+  "summary": "A feedback delay network reverb built on an 8-channel diffusion core, with ten proprietary spatial algorithms, pitch-shifting tails, and an automated parameter-morphing crossfader.",
+  "price": "$79",
+  "currency": "USD",
+  "image": "/gfx/CSPHX_BlockRotator_ChromeFace.png",
+  "gallery": [
+    "/gfx/CSPHX_BlockRotator_ChromeFace.png",
+    "/gfx/CSPHX_BlockRotator_SmokeFace.png",
+    "/gfx/CSPHX_BlockRotator_XodHotFace.png"
+  ],
+  "video": "/gfx/blockRotatorDM_breaksX4_cut1.mp4",
+  "highlights": [
+    {
+      "title": "8-Channel Diffusion Delay Feedback Network",
+      "body": "Eight parallel delay lines feed a diffusion matrix, producing dense, evolving reverb tails that range from tight ambience to vast, disintegrating spaces."
+    },
+    {
+      "title": "10 Proprietary Spatial Algorithms",
+      "body": "Two banks of five. Max Diffusion — Cyclops, Apshai, EyeDescent, Scarab, DeathIbis — scatters signal across the spectrum into lush washes. Max Rotation — BlockRotate, Schistdisc, BloodLoom, Sekhmetal, Uncoiling — builds orbiting, spiralling stereo fields with real physical motion."
+    },
+    {
+      "title": "Pitch-Shifting Reverb Tails",
+      "body": "Transpose the feedback path so repeats drift upward or downward, producing shimmering, endlessly ascending spaces or subterranean descents."
+    },
+    {
+      "title": "Resonant Multi-Mode Filter",
+      "body": "Shape the feedback path with a resonant filter, sculpting the tone of every repetition as it decays."
+    },
+    {
+      "title": "Parameter Morphing Crossfader",
+      "body": "Capture two complete parameter states and crossfade between them — manually, via LFO, or under host automation — for transitions no single knob can produce."
+    },
+    {
+      "title": "Real-Time Visualization",
+      "body": "Watch the network work: live displays of the diffusion field, stereo correlation, and level metering."
+    }
+  ],
+  "specs": [
+    ["Effect type", "Feedback delay network reverb"],
+    ["Channels", "8-channel diffusion core"],
+    ["Algorithms", "10 (5 Max Diffusion, 5 Max Rotation)"],
+    ["Modulation", "Parameter morphing crossfader, LFO, host automation"],
+    ["Presets", "Factory banks plus unlimited user presets"],
+    ["Processing", "64-bit internal, SIMD-accelerated"]
+  ],
+  "formats": ["VST3 (macOS, Windows, Linux)", "AU (macOS)"],
+  "requirements": [
+    "A DAW that supports VST3 plugins (or AU on macOS)",
+    "macOS (Intel or Apple Silicon), Windows, or Linux",
+    "Multi-core CPU recommended when visualization is enabled"
+  ],
+  "audience": "Producers and sound designers who want a reverb with character and motion rather than a neutral room — electronic, experimental, ambient, and cinematic work."
+}
