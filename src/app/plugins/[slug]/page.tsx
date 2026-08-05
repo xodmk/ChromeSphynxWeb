@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { PRODUCTS, getProduct } from '../../../lib/products';
+import { PURCHASING_ENABLED } from '../../../lib/status';
+import WipNotice from '../../components/WipNotice';
 
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -37,11 +39,21 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               <p className="product-tagline">{product.tagline}</p>
               <p style={{ color: '#9ca3af', lineHeight: 1.75 }}>{product.summary}</p>
 
+              {!PURCHASING_ENABLED && <WipNotice />}
+
               <div className="buy-row">
                 <span className="price-tag">{product.price}</span>
-                {/* TODO(mor): replace with the Paddle checkout overlay once the
-                    account is verified. Until then this points at support. */}
-                <Link className="button primary" href={`/support#buying`}>Buy {product.name}</Link>
+                {PURCHASING_ENABLED ? (
+                  // TODO(mor): swap for the Paddle checkout overlay once the
+                  // account is verified.
+                  <Link className="button primary" href="/support#buying">
+                    Buy {product.name}
+                  </Link>
+                ) : (
+                  <span className="button primary is-disabled" aria-disabled="true">
+                    Not yet on sale
+                  </span>
+                )}
                 <Link className="button secondary" href="/trial">Free 20-day trial</Link>
               </div>
 

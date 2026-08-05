@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { SUPPORT_EMAIL } from '../../lib/site';
 import { PRODUCTS } from '../../lib/products';
+import { PURCHASING_ENABLED } from '../../lib/status';
+import WipNotice from '../components/WipNotice';
 
 export const metadata: Metadata = {
   title: 'Support — Chrome Sphynx Audio',
@@ -22,6 +24,7 @@ export default function SupportPage() {
             </p>
 
             <h2 id="buying">Buying</h2>
+            {!PURCHASING_ENABLED && <WipNotice />}
             <p>
               {PRODUCTS.map((p) => p.name).join(' and ')} are sold individually.
               Checkout is handled by our merchant of record, who will appear as the

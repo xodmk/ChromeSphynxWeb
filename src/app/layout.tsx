@@ -159,6 +159,46 @@ export default function RootLayout({
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
           }
 
+          /* Pre-launch notice — see src/lib/status.ts */
+          .wip-notice {
+            background: rgba(234, 179, 8, 0.10);
+            border: 1px solid rgba(234, 179, 8, 0.45);
+            border-radius: 0.6rem;
+            padding: 1rem 1.25rem;
+            margin: 0 0 1.25rem;
+            max-width: 640px;
+          }
+
+          .wip-notice.wip-compact {
+            padding: 0.6rem 0.9rem;
+            margin: 0;
+          }
+
+          .wip-headline {
+            display: block;
+            color: #fbbf24;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+          }
+
+          .wip-body {
+            color: #d1d5db;
+            margin: 0.4rem 0 0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+          }
+
+          /* Disabled call-to-action: looks inert, cannot be clicked. */
+          .button.is-disabled {
+            background: #1f2937;
+            color: #6b7280;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
+          }
+
+          .button.is-disabled:hover { transform: none; background: #1f2937; }
+
           /* Artwork is near-square (~966x938); a fixed height would crop it. */
           .plugin-image {
             width: 100%;

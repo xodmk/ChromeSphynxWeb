@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import content from '../content/content.json';
 import { PRODUCTS } from '../lib/products';
+import { PURCHASING_ENABLED } from '../lib/status';
+import WipNotice from './components/WipNotice';
 
 export default function Home() {
   const { header = {}, hero = {}, showcase = {}, features = {}, site = {} } = content as any;
@@ -33,6 +35,12 @@ export default function Home() {
               computers you own — no dongle, no online activation.
             </p>
           </div>
+
+          {!PURCHASING_ENABLED && (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <WipNotice />
+            </div>
+          )}
 
           <div className="grid">
             {PRODUCTS.map((plugin) => (
