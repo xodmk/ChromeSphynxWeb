@@ -34,6 +34,21 @@ function require_(value: string | undefined, name: string): string {
   return value;
 }
 
+// Format a 64-char hex public key as the C++ initializer the plugins expect.
+function cppKeyArray(publicKeyHex: string): string {
+  const hex = publicKeyHex.trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(hex)) {
+    console.error('public key must be 64 hex characters (32 bytes)');
+    process.exit(1);
+  }
+  const bytes = hex.match(/.{2}/g)!.map((b) => `0x${b}`);
+  const lines: string[] = [];
+  for (let i = 0; i < bytes.length; i += 8) {
+    lines.push('    ' + bytes.slice(i, i + 8).join(', ') + ',');
+  }
+  return `inline constexpr uint8_t kLicensePublicKey[32] = {\n${lines.join('\n')}\n};`;
+}
+
 function decodeArmored(file: string) {
   const armored = readFileSync(file, 'utf8');
   const b64 = armored
@@ -48,8 +63,25 @@ const command = process.argv[2];
 switch (command) {
   case 'keygen': {
     const { publicKeyHex, privateKeyHex } = generateLicenseKeyPair();
-    console.log('public key  (embed in plugins + verify calls):', publicKeyHex);
-    console.log('private key (CS_LICENSE_PRIVATE_KEY — keep secret):', privateKeyHex);
+    const out = arg('out') ?? 'cs-license-private-key.txt';
+
+    // The private key is written to a 0600 file rather than printed, so it
+    // never lands in terminal scrollback or shell history.
+    writeFileSync(out, privateKeyHex + '\n', { mode: 0o600 });
+
+    console.log('PUBLIC KEY (safe to share; compiled into the plugins)');
+    console.log(`  ${publicKeyHex}\n`);
+    console.log('Paste this into each plugin\'s LicenseConfig.h:\n');
+    console.log(cppKeyArray(publicKeyHex));
+    console.log(`\nPRIVATE KEY written to ${out} (mode 0600) — NEVER commit it.`);
+    console.log('  1. Copy its contents into Vercel as CS_LICENSE_PRIVATE_KEY');
+    console.log('  2. Store a backup in your password manager');
+    console.log(`  3. Delete the file:  rm ${out}`);
+    break;
+  }
+  case 'cppkey': {
+    // Re-print the C++ array for a public key you already have.
+    console.log(cppKeyArray(require_(arg('pubkey'), 'pubkey')));
     break;
   }
   case 'issue': {
@@ -107,6 +139,6 @@ switch (command) {
     break;
   }
   default:
-    console.error('usage: license-cli.ts <keygen|issue|verify|inspect> [options]');
+    console.error('usage: license-cli.ts <keygen|cppkey|issue|verify|inspect> [options]');
     process.exit(1);
 }

@@ -7,8 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/legal/privacy' },
 };
 
-// TODO(owner): replace [LEGAL NAME]. Revisit if analytics is added later —
-// the "no tracking" statement below must stay true.
+// Revisit if analytics is ever added — the "no tracking" statement must stay true.
 export default function PrivacyPage() {
   return (
     <main>
@@ -20,8 +19,9 @@ export default function PrivacyPage() {
 
             <h2>Who is responsible</h2>
             <p>
-              <span className="todo-token">[LEGAL NAME]</span>, trading as Chrome
-              Sphynx Audio, is the data controller. Contact:{' '}
+              <strong>Elliot Schei</strong>, trading as Chrome Sphynx Audio, of
+              Suginami-ku Takaido Higashi 3-16-33, Tokyo, Japan 168-0072, is the
+              data controller. Contact:{' '}
               <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
             </p>
 

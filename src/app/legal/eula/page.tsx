@@ -29,8 +29,8 @@ export default function EulaPage() {
 
             <h2>1. Licence grant</h2>
             <p>
-              <span className="todo-token">[LEGAL NAME]</span>, trading as Chrome
-              Sphynx Audio (&quot;Licensor&quot;), grants you a non-exclusive,
+              <strong>Elliot Schei</strong>, trading as Chrome Sphynx Audio
+              (&quot;Licensor&quot;), grants you a non-exclusive,
               non-transferable licence to install and use the Software on any
               computer or computers that you own or control, for personal or
               commercial music production.

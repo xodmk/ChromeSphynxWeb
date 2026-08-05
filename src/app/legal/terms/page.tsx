@@ -8,9 +8,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/legal/terms' },
 };
 
-// TODO(owner): replace [LEGAL NAME] and [BUSINESS ADDRESS] before submitting the
-// domain to the merchant of record. Paddle requires the sole proprietor's legal
-// name in the Terms. Have these reviewed by a professional before launch.
+// Trading identity supplied by the owner 2026-08-05. Have these terms reviewed
+// by a professional before launch.
 export default function TermsPage() {
   return (
     <main>
@@ -22,12 +21,10 @@ export default function TermsPage() {
 
             <h2>1. Who we are</h2>
             <p>
-              Chrome Sphynx Audio is a trading name of{' '}
-              <span className="todo-token">[LEGAL NAME]</span>, a sole proprietor
-              registered in Japan, at{' '}
-              <span className="todo-token">[BUSINESS ADDRESS]</span> (&quot;we&quot;,
-              &quot;us&quot;). You can reach us at{' '}
-              <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
+              Chrome Sphynx Audio is a trading name of <strong>Elliot Schei</strong>,
+              a sole proprietor registered in Japan, at Suginami-ku Takaido Higashi
+              3-16-33, Tokyo, Japan 168-0072 (&quot;we&quot;, &quot;us&quot;). You
+              can reach us at <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.
             </p>
 
             <h2>2. What we sell</h2>

@@ -10,5 +10,7 @@ out/
 .env
 .env.local
 .env*.local
+cs-license-private-key.txt
+*-private-key.txt
 
 *.tsbuildinfo
