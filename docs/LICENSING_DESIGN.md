@@ -181,6 +181,27 @@ Format details, discovery paths, and test vectors: `PLUGIN_LICENSE_SPEC.md`.
 | Binary patching of the plugin | *Out of scope — accepted, per Audio Damage philosophy; DRM arms races punish customers.* |
 | Trial-endpoint abuse (bots) | Per-IP rate limit now; edge rate limiting + store-backed counters before launch (L3). |
 
+### Key ceremony — production keypair (2026-08-07)
+
+| | |
+|---|---|
+| Generated | 2026-08-07, `npm run license -- keygen` on the owner's machine |
+| Public key | `deda76f2f48f57795d1f7cc25e283d8811c6c492efb00bcaa936582586964275` |
+| Private half held in | Vercel env var `CS_LICENSE_PRIVATE_KEY` (Production scope) + owner's password manager |
+| Private half NOT in | this repository, any plugin repo, any log, any chat transcript |
+| Verified | 64 hex chars; C initializer regenerated from the hex and diffed against the printed block — identical |
+
+The public key is recorded in `PLUGIN_LICENSE_SPEC.md` §7.1 and is safe to
+publish: it verifies signatures and cannot produce them.
+
+**Loss of the private key is unrecoverable.** Every licence ever issued
+becomes unverifiable, and the only remedy is shipping a plugin update built
+against a new key. Back it up before deleting the local file.
+
+**Rotation / compromise procedure**: generate a new pair, ship a plugin
+release that accepts both the old and new public keys for one version cycle,
+reissue on request, then drop the old key in the following release.
+
 ### Operations
 
 - `npm run license -- keygen` → prints the keypair. Private key goes **only**
@@ -224,8 +245,10 @@ No DSP or installer changes anywhere below; effort assumes one developer.
    domain has exactly one SPF TXT record — Cloudflare Email Routing already
    created one, so Resend's `include:` must be **merged into it**, not added
    as a second record.
-3. Generate the production keypair (L4) and set env vars in Vercel. Then
-   issue a handoff to swap the RFC test key in both plugins' `LicenseConfig.h`.
+3. ~~Generate the production keypair (L4)~~ — **done 2026-08-07**; see "Key
+   ceremony" above and `PLUGIN_LICENSE_SPEC.md` §7.1. Remaining: set
+   `CS_LICENSE_PRIVATE_KEY` in Vercel, and run HANDOFF-05 to replace the RFC
+   test key in both plugins' `LicenseConfig.h`.
 4. Paddle: create the catalog, set `PADDLE_WEBHOOK_SECRET_KEY`,
    `PADDLE_API_KEY`, and `CS_PADDLE_PRODUCT_MAP` (Paddle price/product id →
    our product id), and point a notification destination at

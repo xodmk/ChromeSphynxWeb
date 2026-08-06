@@ -158,9 +158,51 @@ check. If `now < hw - 24h`, set a persistent `rollback` flag ⇒ state
 The 24h tolerance forgives timezone/DST fixes; deleting the state file only
 helps an attacker if they also keep the clock rolled back for real.
 
-## 7. Test vectors
+## 7. Keys
 
-Keypair: RFC 8032 Ed25519 TEST 1 (public knowledge — test use only):
+Two keys exist and must never be confused. The **production** key is what
+ships; the **test** key exists only so the §7.2 vectors can be checked by
+anyone, including in public CI.
+
+### 7.1 Production signing key (generated 2026-08-07)
+
+This is the key to compile into every released plugin. The private half is
+held only in the website's `CS_LICENSE_PRIVATE_KEY` environment variable and
+in the owner's password manager — it is not in this repository and must never
+be.
+
+```
+deda76f2f48f57795d1f7cc25e283d8811c6c492efb00bcaa936582586964275
+```
+
+```cpp
+inline constexpr uint8_t kLicensePublicKey[32] = {
+    0xde, 0xda, 0x76, 0xf2, 0xf4, 0x8f, 0x57, 0x79,
+    0x5d, 0x1f, 0x7c, 0xc2, 0x5e, 0x28, 0x3d, 0x88,
+    0x11, 0xc6, 0xc4, 0x92, 0xef, 0xb0, 0x0b, 0xca,
+    0xa9, 0x36, 0x58, 0x25, 0x86, 0x96, 0x42, 0x75,
+};
+```
+
+Publishing a public key is safe by design: it can verify signatures but
+cannot create them. Regenerate the C initializer at any time with
+`npm run license -- cppkey --pubkey <hex>`.
+
+A plugin built against this key accepts only licences signed by its private
+half. Mismatched halves fail in a way that looks like "my licence doesn't
+work", so verify the pair before any release build:
+
+```
+npm run license -- issue --type full --product block-rotator \
+  --email you@example.com --out /tmp/t.cslic
+npm run license -- verify --file /tmp/t.cslic --pubkey deda76f2…
+```
+
+### 7.2 Test vectors
+
+Keypair: RFC 8032 Ed25519 TEST 1 (public knowledge — test use only). The
+vectors below are signed with it, so they verify **only** against this key,
+never against the production key above:
 
 - private seed: `9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60`
 - public key:  `d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a`

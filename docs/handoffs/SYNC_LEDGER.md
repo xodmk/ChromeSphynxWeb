@@ -13,8 +13,9 @@ RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/
 | HANDOFF-02A | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `f3d6114` | **verified** 2026-08-03 | R1 latched gate delivered; 126/126 tests; Release VST3 links (19 `cslic::` syms); diff audit = 2 hunks, no DSP change. Host UI check outstanding † |
 | HANDOFF-02B | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `f3d6114` | **verified** 2026-08-03 | R1 latched gate delivered; 249/258 (9 pre-existing fails unchanged), 16/16 licensing; Release VST3 re-verified under HANDOFF-03 — it did **not** link before `d2c0006`. Host UI check outstanding † |
 | HANDOFF-03 | master (report back) | — | `f3d6114` | **reported** 2026-08-03 | cslicense PIC fix; both plugins re-verified from clean trees; 3 upstream items + 4 open decisions |
-| HANDOFF-04A | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` **+ `_INSTALL`** | n/a | **issued** 2026-08-03 | D-L1 finish: customer docs (34 occurrences, product-vs-feature split) + D-N1 `PRODUCT_NAME` rename + installer upstream keys; VST3 UID measured first |
-| HANDOFF-04B | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` **+ `_INSTALL`** | n/a | **issued** 2026-08-03 | D-N1 naming only (docs already clean); same UID check, measured independently |
+| HANDOFF-04A | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` **+ `_INSTALL`** | n/a | **superseded** by 05 | Naming/docs work folded into HANDOFF-05 |
+| HANDOFF-04B | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` **+ `_INSTALL`** | n/a | **superseded** by 05 | Naming work folded into HANDOFF-05 |
+| HANDOFF-05 | both plugins | each `*_PLUGX` **+ `*_INSTALL`** | n/a | **issued** 2026-08-07 | Release prep: production key + naming in one build cycle. One session per plugin |
 | — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | changed by 04B only | Still license-agnostic; 04B updates the two upstream bundle keys; PLUGIN_LICENSE_URL later |
 | — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | changed by 04A only | Same |
 
@@ -63,6 +64,22 @@ targets (HANDOFF-03 action 3).
   installed *file* was never wrong. Only the name compiled into the binary
   (`JucePlugin_Name`, what hosts display) is. The installer change is
   therefore two data keys, not a code change.
+
+## Production signing key (registered 2026-08-07)
+
+Public half — safe to publish, compiled into every released plugin:
+
+```
+deda76f2f48f57795d1f7cc25e283d8811c6c492efb00bcaa936582586964275
+```
+
+Full record in `LICENSING_DESIGN.md` → "Key ceremony"; the C initializer to
+paste into plugins is in `PLUGIN_LICENSE_SPEC.md` §7.1. The private half is
+in Vercel (`CS_LICENSE_PRIVATE_KEY`) and the owner's password manager only —
+never in any repository. Losing it invalidates every licence ever issued.
+
+Any plugin still carrying the RFC 8032 test key
+(`d75a9801…`) is **not** release-ready. HANDOFF-05 does the swap.
 
 ## As-built record
 
