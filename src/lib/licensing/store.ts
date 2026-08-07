@@ -109,6 +109,16 @@ export const fileStore: LicenseStore = {
 
 let cached: LicenseStore | undefined;
 
+// True when writes will actually persist. The file backend is not durable
+// anywhere, and on serverless hosts it cannot even be written: Vercel's
+// filesystem is read-only outside /tmp, so mkdirSync/writeFileSync throw.
+// Callers that must record something (trial issuance) check this first and
+// refuse the request, rather than issuing a licence they cannot log — which
+// would make "one trial per email" silently unenforceable.
+export function storeIsDurable(): boolean {
+  return Boolean(process.env.DATABASE_URL);
+}
+
 export function getStore(): LicenseStore {
   if (cached) return cached;
   if (process.env.DATABASE_URL) {
@@ -116,9 +126,10 @@ export function getStore(): LicenseStore {
     cached = require('./store-postgres').postgresStore as LicenseStore;
   } else {
     if (process.env.NODE_ENV === 'production') {
-      console.warn(
-        '[licensing] DATABASE_URL is not set — falling back to the ephemeral ' +
-          'file store. Trials and orders WILL be lost. Set DATABASE_URL.',
+      console.error(
+        '[licensing] DATABASE_URL is not set. The file store cannot be written ' +
+          'on a read-only serverless filesystem, so every write will fail. ' +
+          'Provision Postgres, run `npm run db:migrate`, and set DATABASE_URL.',
       );
     }
     cached = fileStore;

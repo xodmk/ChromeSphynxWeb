@@ -237,10 +237,19 @@ No DSP or installer changes anywhere below; effort assumes one developer.
 
 1. ~~Durable issuance store~~ — **built** (2026-08-04). Postgres backend in
    `store-postgres.ts`, selected whenever `DATABASE_URL` is set; schema in
-   `schema.sql`, applied with `npm run db:migrate`. Remaining: provision the
-   database (any Postgres — Neon, Supabase), use the **pooled** connection
-   string, and set `DATABASE_URL` in Vercel. Without it the app falls back to
-   the ephemeral file store and logs a warning in production.
+   `schema.sql`, applied with `npm run db:migrate`. **Still outstanding:**
+   provision the database (any Postgres — Neon, Supabase), use the **pooled**
+   connection string, set `DATABASE_URL` in Vercel, and run the migration.
+
+   *Correction (2026-08-08, found by probing the live deployment.)* An earlier
+   revision said a missing `DATABASE_URL` merely loses data. That was wrong.
+   Vercel's filesystem is read-only outside `/tmp`, so the file backend's
+   `mkdirSync`/`writeFileSync` **throw**, and `/api/trial` returned an opaque
+   HTTP 500 with an empty body. Reads still worked — `/api/account/resend`
+   answered 200 — which is what isolated it to writes. The endpoint now checks
+   `storeIsDurable()` and returns a clear 503 instead, because issuing a trial
+   we cannot record would make one-per-email silently unenforceable. The real
+   fix remains provisioning the database.
 2. Email provider + domain auth (L2); set `CS_LICENSE_EMAIL_FROM`. Note the
    domain has exactly one SPF TXT record — Cloudflare Email Routing already
    created one, so Resend's `include:` must be **merged into it**, not added

@@ -5,7 +5,7 @@
 import { NextResponse } from 'next/server';
 import { TRIAL_DAYS, issueLicense, trialPayload } from '@/lib/licensing/license';
 import { PRODUCTS, isProductId } from '@/lib/licensing/products';
-import { getStore, normalizeEmail } from '@/lib/licensing/store';
+import { getStore, normalizeEmail, storeIsDurable } from '@/lib/licensing/store';
 import { sendLicenseEmail } from '@/lib/licensing/email';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,6 +28,21 @@ export async function POST(req: Request) {
   const privateKey = process.env.CS_LICENSE_PRIVATE_KEY;
   if (!privateKey) {
     return NextResponse.json({ error: 'Licensing is not configured.' }, { status: 503 });
+  }
+
+  // Refuse rather than issue a licence we cannot record: without a durable
+  // store the one-trial-per-email rule is unenforceable, and on Vercel the
+  // write throws anyway (read-only filesystem outside /tmp).
+  //
+  // Gated on VERCEL, not NODE_ENV: `next start` sets NODE_ENV=production even
+  // on a developer machine, where the file store works fine and is the whole
+  // point of having a file store.
+  if (!storeIsDurable() && process.env.VERCEL) {
+    console.error('[trial] refused: no durable store (DATABASE_URL unset)');
+    return NextResponse.json(
+      { error: 'Trials are temporarily unavailable. Please try again later.' },
+      { status: 503 },
+    );
   }
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
