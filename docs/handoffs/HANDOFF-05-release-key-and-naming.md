@@ -102,6 +102,35 @@ update install instructions to the new artifact name, and leave
 and renaming it breaks every saved preset. List anything ambiguous in the
 report rather than guessing.
 
+## T4b — Runtime cost model (spec v2.1 §5) — **required**
+
+The already-shipped integration follows v1.4, which called `evaluate()` from
+`prepareToPlay`. That is now a defect: `evaluate()` scans the licence
+directory, verifies an Ed25519 signature and writes the rollback mark, and
+hosts call `prepareToPlay` on every sample-rate and buffer-size change. Bring
+each plugin to v2.1:
+
+1. **Remove the `evaluate()` call from `prepareToPlay`.** Full evaluation runs
+   only at processor construction and after a user installs a licence.
+2. Add a plain `bool settled_`, set when a valid `full` licence is found.
+3. `prepareToPlay` becomes:
+   ```cpp
+   if (licenseState_.settled()) return;   // licensed: zero work, forever
+   licenseState_.refreshTrialFromCachedStart();  // two ints and a compare
+   ```
+   No file access, no crypto — the trial start time is cached at construction.
+4. `processBlock` is unchanged: still exactly one relaxed atomic load folded
+   into the existing bypass early-return. Do not add anything else.
+5. The §6 high-water mark is written at most once per instance, and only while
+   a trial is in effect. A licensed plugin must write nothing.
+
+**Prove it, don't assert it.** In the report, state for each of the three
+states (licensed / trial / expired) exactly what `prepareToPlay` and
+`processBlock` execute. Block Rotator already has an
+`AudioProcessLoadMeasurer` in `processBlock` — use it to report measured CPU
+with licensing compiled in versus the gate forced true, so the
+zero-impact claim rests on measurement rather than on reading the diff.
+
 ## T5 — Verify
 
 - Full suite at the baseline in the table. Zero new failures.

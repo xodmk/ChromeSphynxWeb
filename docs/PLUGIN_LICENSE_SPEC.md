@@ -1,5 +1,12 @@
 # Chrome Sphynx License — Plugin Integration Spec (v2.0)
 
+> **v2.1 (2026-08-09) — normative cost model.** §5 is rewritten: a licensed
+> plugin performs **no licensing work at all** after construction — nothing in
+> `prepareToPlay`, no disk, no crypto. Full evaluation runs exactly twice in a
+> plugin's life (construction, and after a user installs a licence). v1.4's
+> instruction to evaluate in `prepareToPlay` is withdrawn as a defect: hosts
+> call it on every sample-rate and buffer-size change.
+>
 > **v2.0 (2026-08-09) — the trial is now plugin-managed.** Trials are no
 > longer issued as signed `.cslic` files by the website. The plugin starts its
 > own 20-day trial on first run and tracks it locally. Purchased licences are
@@ -148,21 +155,73 @@ while unlicensed. "Get your license" opens the store URL in the default
 browser. Serial auto-format from v3 does not apply — the paste box takes the
 whole armored block.
 
-## 5. Evaluation points & the latched gate (v1.4)
+## 5. Evaluation points & the settled gate (v2.1 — normative cost model)
 
-`cslic::evaluate()` performs filesystem I/O and runs ONLY in non-realtime
-contexts: (a) plugin construction, (b) `prepareToPlay`, (c) immediately
-after a successful license install (message thread). The result latches
-`processingAllowed` (`std::atomic<bool>`) and caches the `cslic::Status`
-for the GUI.
+**Once a valid perpetual licence is found, the plugin does no licensing work
+of any kind for the rest of its life** — no disk access, no cryptography, no
+arithmetic, nothing in `prepareToPlay`. The only residue anywhere is a single
+atomic load in `processBlock`, described in §4.
 
-The gate is **latched**: it is never flipped during continuous playback.
-Crossing the expiry boundary mid-session updates only the GUI — the badge/
-panel recompute remaining time from the cached payload's `expiresAt` with no
-re-evaluation and no disk access — while audio enforcement takes effect at
-the next `prepareToPlay` / session reload. The single permitted mid-session
-gate change is the user-initiated unlock (install → re-evaluate → enable),
-where a one-time transition artifact is accepted.
+### Full evaluation — expensive, and strictly bounded
+
+`cslic::evaluate()` scans the licence directory, reads files, verifies an
+Ed25519 signature, and may write the rollback high-water mark. It is far too
+costly to repeat casually. It runs in exactly two situations, both
+non-realtime:
+
+1. **Once at processor construction.**
+2. **After the user installs a licence** (paste / load file / drag-drop),
+   on the message thread.
+
+It must **not** run in `prepareToPlay`, and must not run on a timer.
+(v1.4 placed it in `prepareToPlay`; that was wrong — hosts call
+`prepareToPlay` on every sample-rate and buffer-size change, and some on each
+transport start, so a directory scan plus signature verification plus a file
+write repeated on a hot path is exactly the overhead this spec exists to
+prevent.)
+
+### The settled flag
+
+Evaluation produces a latched `std::atomic<bool> processingAllowed` plus a
+plain `bool settled`. `settled` is true when the outcome can never change on
+its own — that is, when a valid `full` licence was found. From then on:
+
+| | Licensed (settled) | Trial active | Expired / unlicensed |
+|---|---|---|---|
+| `processBlock` | 1 relaxed atomic load | 1 relaxed atomic load | 1 relaxed atomic load |
+| `prepareToPlay` | **nothing — immediate return** | one integer comparison | one integer comparison |
+| Disk / crypto | never again | never (values cached in memory) | never |
+
+### `prepareToPlay` — the only permitted periodic check
+
+```
+if (settled) return;                 // licensed: zero work, forever
+if (now - cachedTrialStart >= 20 days) processingAllowed = false;
+```
+
+Two integers and a comparison, against values already resident in memory from
+construction. No file is opened, no signature is checked, and nothing is
+written. This is what lets a running trial notice its own expiry without
+polling anything.
+
+### The gate is latched during playback
+
+`processingAllowed` never flips between `processBlock` calls in a continuous
+stream — it changes only at `prepareToPlay` or on a user-initiated unlock, so
+no ramp or crossfade is needed (§4). Crossing the expiry boundary mid-session
+updates only the GUI, from cached values; audio enforcement lands at the next
+`prepareToPlay`. The single permitted mid-session change is the user pasting a
+licence, where a one-time transition is accepted.
+
+### Why the atomic load cannot be zero
+
+Something must distinguish licensed from unlicensed at block scope, and a
+relaxed load of an in-cache `bool` is the cheapest possible expression of it —
+the same operation the existing bypass check already performs, on a branch the
+predictor gets right every time. Removing it would require indirect dispatch
+(function pointer or virtual call), which costs strictly more than the load it
+replaces. One predictable load per buffer is the floor, and it is not
+measurable against any real DSP workload.
 
 ## 6. Clock-rollback guard (trial only)
 
@@ -285,6 +344,20 @@ The plugin owns the trial. No network, no licence file, no server.
    `TrialExpired` regardless of arithmetic.
 5. A valid `full` licence always wins — it is checked before any trial state,
    and trial files are then irrelevant.
+
+**Cost rules (normative, per §5)**
+
+6. `trial-start.txt` is read **once**, at construction, and its value cached
+   in memory. `prepareToPlay` compares against the cached integer and never
+   re-reads the file.
+7. The §6 high-water mark is written **at most once per plugin instance**, at
+   construction, and **only while a trial is in effect**. A licensed plugin
+   writes nothing, ever. Repeatedly rewriting it on every evaluation — as a
+   naive reading of §6 would suggest — would put a file write on the host's
+   prepare path for no benefit.
+8. When a valid `full` licence is present, none of §9 executes at all: no
+   trial file is opened, no timestamp is compared, and `settled` is set so
+   `prepareToPlay` returns immediately.
 
 **Threat model, stated plainly.** Deleting `trial-start.txt`, or reinstalling
 into a clean user-data directory, restarts the trial. This is accepted: it is

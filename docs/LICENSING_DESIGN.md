@@ -86,7 +86,10 @@ Companion spec for the plugin repos: `docs/PLUGIN_LICENSE_SPEC.md`
    zero CPU cost to real-time processing, modifies no DSP, and adds nothing
    to `processBlock` beyond one relaxed atomic load folded into the existing
    bypass early-return. Evaluation runs only at construction /
-   `prepareToPlay` / post-install; the gate is latched and never flips
+   post-install (spec v2.1 §5 removed `prepareToPlay`, where hosts call it on
+   every sample-rate change); once licensed the plugin does no licensing work
+   at all, and `prepareToPlay` returns immediately. The gate is latched and
+   never flips
    during playback. Spec bumped to v1.4.
 
    Correction record: the observation remains that expired plugins must pass
