@@ -103,6 +103,45 @@ feature-limited demo (D6). Owner decision supersedes it with the 20-day
 time-limited trial; the "offline verification, no activation server" principle
 is preserved — the only online step is one-time trial/license *issuance*.
 
+## Architecture revision — stateless (2026-08-09)
+
+Owner directive after reviewing complexity: keep offline self-signed licences,
+but remove the infrastructure. **There is no database.** Paddle is the system
+of record; we store nothing.
+
+Three changes made it possible:
+
+1. **The trial moved into the plugin.** It writes a first-run timestamp and
+   counts 20 days locally, guarded by the §6 clock-rollback check. No trial
+   endpoint, no email, no per-address enforcement. *This reverses decision #1
+   (email-gated trials), which was the single requirement that forced a
+   database.* Its anti-abuse value was always weak — a second email address
+   defeated it — and it cost a store, a mail provider, and a web form. The
+   original `chrome-sphynx-license-spec` v3 had a local trial; this returns to
+   it, at 20 days rather than 5.
+2. **Licence generation is deterministic.** The payload is derived entirely
+   from the order — product, email, transaction id, and the transaction's own
+   timestamp — never from `now()`. The same purchase therefore signs to
+   byte-identical output forever. A duplicate webhook re-sends the same file
+   instead of minting a second licence, so the idempotency table is gone.
+   Guarded by `tests/determinism.test.ts`, which exists to protect the
+   architecture rather than the function.
+3. **Re-sends query Paddle.** `/account` asks Paddle what the customer bought
+   (`GET /customers?email=` then `GET /transactions?customer_id=&status=completed`)
+   and regenerates each licence. No order table.
+
+Removed: `store.ts`, `store-postgres.ts`, `schema.sql`, `db-migrate.ts`, the
+`pg` dependency, `DATABASE_URL`, and `/api/trial`. Runtime dependencies are
+back to Next and React alone. What survives is the part that mattered — an
+Ed25519 licence the plugin verifies offline, with no runtime dependency on us
+or on Paddle.
+
+Trade-offs accepted: a local trial is resettable by a determined user
+(reinstall or clock manipulation past the guard) — normal for indie audio
+software and treated as casual deterrence, not protection; and licence
+re-sends now depend on Paddle's API being reachable, though only for re-sends,
+never for a plugin to keep working.
+
 ## Spec lineage & reconciliation (2026-08-03)
 
 An earlier spec exists at

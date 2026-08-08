@@ -9,8 +9,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 // Paddle's own SDKs allow 5 seconds. That is tight for a cold-starting
-// serverless function, and replay protection here rests primarily on event-id
-// idempotency in the store, so we allow more clock/latency slack.
+// serverless function. Replaying a captured webhook cannot mint anything new
+// anyway — issuance is deterministic, so a replay regenerates the identical
+// licence and re-sends it to the same customer — so we allow more slack.
 export const DEFAULT_MAX_AGE_SECONDS = 300;
 
 export type VerifyOutcome =
@@ -57,10 +58,28 @@ export function verifyPaddleSignature(
 export interface PaddlePurchase {
   eventId: string;
   transactionId: string;
+  /** RFC 3339 order time — the licence's issuedAt, so signing is deterministic. */
+  orderedAt: string;
   email?: string;
   customerId?: string;
   /** Paddle price/product ids seen on the transaction, most specific first. */
   paddleIds: string[];
+}
+
+// Collect the Paddle price/product ids on a transaction. Pure, and kept here
+// beside the parser so this module has no relative imports and stays directly
+// loadable by `node --test`.
+export function transactionPaddleIds(tx: any): string[] {
+  const ids: string[] = [];
+  for (const item of tx?.items ?? []) {
+    if (item?.price?.id) ids.push(item.price.id);
+    if (item?.price?.product_id) ids.push(item.price.product_id);
+  }
+  for (const line of tx?.details?.line_items ?? []) {
+    if (line?.price_id) ids.push(line.price_id);
+    if (line?.product?.id) ids.push(line.product.id);
+  }
+  return [...new Set(ids)];
 }
 
 export function parseTransactionCompleted(payload: any): PaddlePurchase | null {
@@ -68,25 +87,17 @@ export function parseTransactionCompleted(payload: any): PaddlePurchase | null {
   const data = payload.data;
   if (!data?.id) return null;
 
-  const paddleIds: string[] = [];
-  for (const item of data.items ?? []) {
-    if (item?.price?.id) paddleIds.push(item.price.id);
-    if (item?.price?.product_id) paddleIds.push(item.price.product_id);
-  }
-  for (const line of data.details?.line_items ?? []) {
-    if (line?.price_id) paddleIds.push(line.price_id);
-    if (line?.product?.id) paddleIds.push(line.product.id);
-  }
-
   return {
     eventId: payload.event_id,
     transactionId: data.id,
+    // Never `now()` — the licence must be reproducible from the order alone.
+    orderedAt: data.created_at ?? data.billed_at ?? payload.occurred_at,
     // Paddle sends customer_id; the email is only inline when the customer is
     // expanded, so the route falls back to the API. custom_data lets a
     // checkout pass the address through directly.
     email: data.customer?.email ?? data.custom_data?.email,
     customerId: data.customer_id ?? data.customer?.id,
-    paddleIds: [...new Set(paddleIds)],
+    paddleIds: transactionPaddleIds(data),
   };
 }
 

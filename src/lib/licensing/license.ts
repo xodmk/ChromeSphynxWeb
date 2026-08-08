@@ -115,6 +115,32 @@ export function trialPayload(product: string, email: string, now: Date = new Dat
   };
 }
 
-function toIsoSeconds(d: Date): string {
+export function toIsoSeconds(d: Date): string {
   return d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+// Build a licence payload determined entirely by the purchase — no clock, no
+// counter, no stored state. Signing the same order twice yields byte-identical
+// output, which is what lets the system be stateless: a duplicate webhook is a
+// harmless re-send, and a lost licence is regenerated rather than looked up.
+export function fullLicensePayload(args: {
+  product: string;
+  email: string;
+  orderId: string;
+  orderedAt: string; // RFC 3339 from the merchant of record
+}): LicensePayload {
+  const email = normalizeEmail(args.email);
+  return {
+    v: LICENSE_FORMAT_VERSION,
+    type: 'full',
+    product: args.product,
+    licensee: email,
+    email,
+    issuedAt: toIsoSeconds(new Date(args.orderedAt)),
+    orderId: args.orderId,
+  };
 }

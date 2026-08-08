@@ -1,4 +1,20 @@
-# Chrome Sphynx License — Plugin Integration Spec (v1.4)
+# Chrome Sphynx License — Plugin Integration Spec (v2.0)
+
+> **v2.0 (2026-08-09) — the trial is now plugin-managed.** Trials are no
+> longer issued as signed `.cslic` files by the website. The plugin starts its
+> own 20-day trial on first run and tracks it locally. Purchased licences are
+> unchanged: still Ed25519-signed, still verified offline, still perpetual.
+>
+> What this changes for implementers:
+> - The website no longer has a trial endpoint; nothing is requested or
+>   emailed for a trial.
+> - `cslicense` gains local trial state (§9) alongside licence verification.
+> - Every `.cslic` a customer receives is now `type: "full"`. The `trial` type
+>   and `expiresAt` remain in the format — the verifier must still handle them
+>   — but nothing issues them today.
+> - Purchased licences are **deterministic**: derived from the order, never
+>   from a clock, so a re-send is byte-identical to the original.
+
 
 Audience: the C++/JUCE plugin repos (Block Rotator, Poltergeist).
 Issuer-side implementation and design rationale: this repo,
@@ -243,6 +259,42 @@ fail at step 3.
 
 Regenerate vectors any time with this repo:
 `node scripts/license-cli.ts issue …` / `verify --pubkey <hex>`.
+
+## 9. Local trial (v2.0)
+
+The plugin owns the trial. No network, no licence file, no server.
+
+**State** lives beside the licence, in the directory from §3
+(`<Documents>/Chrome Sphynx Audio/<Display Name>/`):
+
+| File | Contents |
+|---|---|
+| `trial-start.txt` | epoch seconds of first run, plain text |
+| `license-state.txt` | existing high-water clock mark (§6) |
+| `license-rollback.txt` | existing rollback flag (§6) |
+
+**Rules**
+
+1. On first evaluation with no valid licence and no `trial-start.txt`, write
+   the current time and enter `TrialActive` with the full 20 days.
+2. With `trial-start.txt` present, remaining = `20 days - (now - start)`.
+   `TrialActive` while positive, `TrialExpired` once not.
+3. An unparseable or future-dated `trial-start.txt` ⇒ `TrialExpired`. Fail
+   closed; never rewrite it, or deleting the contents would reset the trial.
+4. The §6 rollback guard applies unchanged: a persisted rollback flag forces
+   `TrialExpired` regardless of arithmetic.
+5. A valid `full` licence always wins — it is checked before any trial state,
+   and trial files are then irrelevant.
+
+**Threat model, stated plainly.** Deleting `trial-start.txt`, or reinstalling
+into a clean user-data directory, restarts the trial. This is accepted: it is
+casual deterrence, matching how indie audio software generally behaves, and
+the alternative (server-issued trials) cost a database and was defeated by a
+second email address anyway.
+
+**States** are otherwise exactly §4 — a trial and a licence produce the same
+`TrialActive` / `Licensed` behaviour, and expiry still means dry passthrough,
+never silence.
 
 ## 8. Shared C++ module placement
 

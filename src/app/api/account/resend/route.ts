@@ -1,12 +1,19 @@
-// POST /api/account/resend — re-send every licence issued to an email address.
+// POST /api/account/resend — re-send every licence bought by an email address.
 //
-// Deliberately gives the same response whether or not the address is known, so
-// the endpoint cannot be used to discover who owns a licence.
+// Stateless: we keep no order database. Paddle is asked what this customer
+// bought, and each licence is regenerated from the order. Because generation is
+// deterministic, the regenerated licence is byte-identical to the one sent at
+// purchase time — the same file, not a replacement.
+//
+// The response is identical whether or not the address is known, so this
+// endpoint cannot be used to discover who owns a licence.
 
 import { NextResponse } from 'next/server';
-import { PRODUCTS } from '@/lib/licensing/products';
-import { getStore, normalizeEmail } from '@/lib/licensing/store';
+import { fullLicensePayload, issueLicense, normalizeEmail } from '@/lib/licensing/license';
+import { PRODUCTS, isProductId } from '@/lib/licensing/products';
 import { sendLicenseEmail } from '@/lib/licensing/email';
+import { resolveProductId } from '@/lib/licensing/paddle';
+import { listCompletedPurchases } from '@/lib/licensing/paddle-api';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -34,15 +41,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Enter a valid email address.' }, { status: 400 });
   }
 
-  const licenses = await getStore().listByEmail(email);
-  for (const issued of licenses) {
-    const productName = PRODUCTS.find((p) => p.id === issued.product)?.name ?? issued.product;
-    await sendLicenseEmail({
-      to: email,
-      productId: issued.product,
-      productName,
-      license: issued.license,
-    });
+  const privateKey = process.env.CS_LICENSE_PRIVATE_KEY;
+  if (privateKey) {
+    for (const purchase of await listCompletedPurchases(email)) {
+      const productId = resolveProductId(purchase.paddleIds, process.env.CS_PADDLE_PRODUCT_MAP);
+      if (!productId || !isProductId(productId)) continue;
+
+      const license = issueLicense(
+        fullLicensePayload({
+          product: productId,
+          email,
+          orderId: purchase.id,
+          orderedAt: purchase.orderedAt,
+        }),
+        privateKey,
+      );
+      const productName = PRODUCTS.find((p) => p.id === productId)?.name ?? productId;
+      await sendLicenseEmail({ to: email, productId, productName, license });
+    }
   }
 
   // Same response either way — never reveal whether the address is known.

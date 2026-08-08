@@ -2,8 +2,8 @@
 //
 // TO GO LIVE: set PURCHASING_ENABLED to true. That is the only change needed —
 // every buy button and notice on the site reads from it. Do it once the Paddle
-// account is verified, CS_PADDLE_PRODUCT_MAP is filled in, DATABASE_URL points
-// at a provisioned database, and the production keypair is in place.
+// account is verified, PADDLE_WEBHOOK_SECRET_KEY / PADDLE_API_KEY /
+// CS_PADDLE_PRODUCT_MAP are set, and released plugin builds exist.
 
 export const PURCHASING_ENABLED = false;
 

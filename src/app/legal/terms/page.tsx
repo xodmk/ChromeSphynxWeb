@@ -59,10 +59,11 @@ export default function TermsPage() {
 
             <h2>5. Trials</h2>
             <p>
-              We offer a free 20-day trial of each plugin. Trials are fully
-              functional. When a trial expires, the plugin stops processing audio
-              and passes it through unaltered until a licence is entered. One
-              trial is issued per product per email address.
+              We offer a free 20-day trial of each plugin. The trial starts when
+              you first load the plugin and runs on your own machine — there is
+              nothing to request and no sign-up. Trials are fully functional.
+              When a trial expires, the plugin stops processing audio and passes
+              it through unaltered until a licence is entered.
             </p>
 
             <h2>6. Refunds</h2>

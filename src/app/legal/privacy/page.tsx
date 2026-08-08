@@ -36,10 +36,10 @@ export default function PrivacyPage() {
             <h2>What the website collects</h2>
             <ul>
               <li>
-                <strong>Trial requests.</strong> When you request a trial we store
-                your email address and which product you asked for, so that the
-                licence can be issued and so each product&apos;s trial is issued once
-                per address.
+                <strong>Trials: nothing at all.</strong> The trial runs entirely
+                inside the plugin on your own machine. There is no form, no
+                sign-up, and no request sent to us — so there is nothing for us
+                to collect or keep.
               </li>
               <li>
                 <strong>Purchases.</strong> Our merchant of record processes your
@@ -70,19 +70,19 @@ export default function PrivacyPage() {
 
             <h2>How long we keep it</h2>
             <p>
-              Order and licence records are kept while your licence is valid and
-              for as long as tax law requires us to retain them. Trial records are
-              kept so that trials remain one-per-address.
+              We hold no customer database of our own. Order records live with
+              our merchant of record for as long as tax law requires, and your
+              licence is regenerated from that order whenever you ask for it
+              again rather than being stored by us.
             </p>
 
             <h2>Your rights</h2>
             <p>
               You can ask us for a copy of your data, ask us to correct it, or ask
               us to delete it — email{' '}
-              <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>. Note that
-              deleting a trial record would let a second trial be issued to that
-              address, so we may decline that specific request while a licence or
-              trial is active.
+              <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>. Because
+              order records are held by our merchant of record for tax purposes,
+              some data must be retained for as long as the law requires.
             </p>
           </article>
         </div>
