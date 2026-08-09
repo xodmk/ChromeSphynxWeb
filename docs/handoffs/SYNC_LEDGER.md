@@ -27,7 +27,7 @@ four spec §4 UI states in a DAW — neither report claims it, and both describe
 what the code draws rather than what a host renders. Production key and store
 URLs also remain `TODO(release)` placeholders in both repos.
 
-Shared-module reference: `csphxAudioPLUGX/cslicense` @ **`f3d6114`**
+Shared-module reference: `csphxAudioPLUGX/cslicense` @ **`55e83ce`**
 (`954b766` → `d2c0006` PIC → `f3d6114` test option + doc refresh). Runtime
 behaviour is unchanged from `954b766` throughout — both deltas are build/doc only. Required by every consumer that links
 cslicense into a plugin target: VST3/AU are shared modules and a non-PIC static

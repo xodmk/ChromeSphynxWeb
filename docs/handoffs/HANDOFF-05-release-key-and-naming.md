@@ -104,32 +104,61 @@ report rather than guessing.
 
 ## T4b — Runtime cost model (spec v2.1 §5) — **required**
 
-The already-shipped integration follows v1.4, which called `evaluate()` from
+The shipped integration follows v1.4, which called `evaluate()` from
 `prepareToPlay`. That is now a defect: `evaluate()` scans the licence
 directory, verifies an Ed25519 signature and writes the rollback mark, and
-hosts call `prepareToPlay` on every sample-rate and buffer-size change. Bring
-each plugin to v2.1:
+hosts call `prepareToPlay` on every sample-rate and buffer-size change.
+
+**`cslicense` already implements the fix** (commit `55e83ce`) — do not
+reimplement it. `Status` now carries `settled`, `trialStart` and `rollback`,
+and there is a new `cslic::refreshTrial(status, now)` that is pure arithmetic.
+Your job is to use them:
 
 1. **Remove the `evaluate()` call from `prepareToPlay`.** Full evaluation runs
    only at processor construction and after a user installs a licence.
-2. Add a plain `bool settled_`, set when a valid `full` licence is found.
-3. `prepareToPlay` becomes:
+2. Cache the `Status` from construction. `prepareToPlay` becomes:
    ```cpp
-   if (licenseState_.settled()) return;   // licensed: zero work, forever
-   licenseState_.refreshTrialFromCachedStart();  // two ints and a compare
+   if (licenseStatus_.settled) return;      // licensed: zero work, forever
+   auto s = cslic::refreshTrial(licenseStatus_, std::time(nullptr));
+   licenseStatus_.state = s;
+   processingAllowed.store(s == cslic::State::Licensed ||
+                           s == cslic::State::TrialActive,
+                           std::memory_order_relaxed);
    ```
-   No file access, no crypto — the trial start time is cached at construction.
-4. `processBlock` is unchanged: still exactly one relaxed atomic load folded
-   into the existing bypass early-return. Do not add anything else.
-5. The §6 high-water mark is written at most once per instance, and only while
-   a trial is in effect. A licensed plugin must write nothing.
+   No file access, no crypto.
+3. `processBlock` is unchanged: exactly one relaxed atomic load folded into
+   the existing bypass early-return. Add nothing else.
+4. The local 20-day trial is now `cslicense`'s job, not yours — it starts
+   automatically on first run. Remove any trial-licence request UI; the
+   website no longer issues trial `.cslic` files. The licence panel keeps the
+   paste box, file load, and buy/trial links.
 
 **Prove it, don't assert it.** In the report, state for each of the three
 states (licensed / trial / expired) exactly what `prepareToPlay` and
-`processBlock` execute. Block Rotator already has an
-`AudioProcessLoadMeasurer` in `processBlock` — use it to report measured CPU
-with licensing compiled in versus the gate forced true, so the
-zero-impact claim rests on measurement rather than on reading the diff.
+`processBlock` execute, and confirm a licensed instance creates no
+`trial-start.txt` or `license-state.txt`.
+
+## T4c — Decide the CPU load measurer (Block Rotator only)
+
+`XodBlockRotatorProcessor::processBlock` opens with
+
+```cpp
+juce::AudioProcessLoadMeasurer::ScopedTimer loadMeasure (loadMeasurer_, buffer.getNumSamples());
+```
+
+and `PluginProcessor.h` exposes `getCpuLoad()` — **which nothing calls.** The
+editor never reads it. So every block pays two high-resolution clock reads and
+the result is discarded. Poltergeist has no equivalent, so the two plugins are
+also inconsistent.
+
+Two high-resolution clock reads per block cost meaningfully more than the
+entire licensing gate (one cached bool load). Default action, unless the owner
+says otherwise: **remove it from the release build** — the `ScopedTimer`, the
+`loadMeasurer_` member, the `reset()` in `prepareToPlay`, and `getCpuLoad()`.
+
+If a CPU readout is wanted later it should be added deliberately and wired to
+the GUI, ideally in both plugins. Report the measured before/after difference
+if you can, using the measurer itself before deleting it.
 
 ## T5 — Verify
 
