@@ -8,6 +8,13 @@ Replaces the 20-day calendar trial with a **fully functional 20-minute
 session demo, preset saving disabled**. Read `PLUGIN_LICENSE_SPEC.md` **v3.0**
 §9 before starting — refresh your repo's copy from the master.
 
+> **Your repo does not currently compile.** `cslicense` `057e809` removed
+> `State::TrialActive`, `State::TrialExpired`, `refreshTrial()`,
+> `Status::daysLeft` and `Status::trialStart`; the plugin still references
+> them (`LicensePanel.cpp`, `LicenseState.cpp`, `PluginProcessor.cpp`). That
+> is expected, not a mistake in your working tree — this handoff is the fix.
+> Adopt the new API rather than trying to restore the old symbols.
+
 ## Why this is smaller than it sounds
 
 `cslicense` (commit `057e809`) has already been simplified: it now returns

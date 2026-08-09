@@ -3,6 +3,10 @@
 Master record of handoffs issued from ChromeSphynxWeb to plugin projects.
 States: issued → in-progress → reported → verified.
 
+**Sequence lives in [`ORDER_OF_WORK.md`](ORDER_OF_WORK.md)** — read that before
+running anything. As of 2026-08-10 both plugins do not compile against
+`cslicense` `057e809` (v3.0 removed the trial API); HANDOFF-07 is the fix.
+
 RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/`.
 `csphxAudioVST3/` is the legacy dev directory.
 
