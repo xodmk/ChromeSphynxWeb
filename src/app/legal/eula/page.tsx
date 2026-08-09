@@ -57,9 +57,11 @@ export default function EulaPage() {
 
             <h2>4. Trials</h2>
             <p>
-              Trial licences permit evaluation for the stated period. When a trial
-              expires the Software passes audio through without processing until a
-              purchased licence is entered.
+              The Software may be evaluated free of charge for 20 days. The trial
+              begins the first time you load the plugin and runs entirely on your
+              own computer; nothing is requested from us and nothing is sent to
+              us. When the trial period ends the Software passes audio through
+              without processing until a purchased licence is entered.
             </p>
 
             <h2>5. No warranty</h2>

@@ -15,7 +15,9 @@ RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/
 | HANDOFF-03 | master (report back) | — | `f3d6114` | **reported** 2026-08-03 | cslicense PIC fix; both plugins re-verified from clean trees; 3 upstream items + 4 open decisions |
 | HANDOFF-04A | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` **+ `_INSTALL`** | n/a | **superseded** by 05 | Naming/docs work folded into HANDOFF-05 |
 | HANDOFF-04B | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` **+ `_INSTALL`** | n/a | **superseded** by 05 | Naming work folded into HANDOFF-05 |
-| HANDOFF-05 | both plugins | each `*_PLUGX` **+ `*_INSTALL`** | n/a | **issued** 2026-08-07 | Release prep: production key + naming in one build cycle. One session per plugin |
+| HANDOFF-05 | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `55e83ce` | **verified** 2026-08-10 | Production key in, RFC key gone; `PRODUCT_NAME "BlockRotator"`; **VST3 class ID unchanged**; load measurer removed; 131/131 tests; production-signed licence cross-check passed |
+| HANDOFF-05 | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | — | **issued**, not yet run | Same brief |
+| HANDOFF-06 | both installers | each `*_INSTALL` | n/a | **issued** 2026-08-10 | Installer copy still says "30-day trial" (actual 20) and names superseded files; EULA has no trial clause |
 | — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | changed by 04B only | Still license-agnostic; 04B updates the two upstream bundle keys; PLUGIN_LICENSE_URL later |
 | — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | changed by 04A only | Same |
 
@@ -117,6 +119,18 @@ not forward (✦). Full context in the implementation record.
 - ✦ **Handoff wording defect — FIXED 2026-08-03**: the diff-audit task said
   the processor diff must show "exactly two things" while T2/T3 and spec §5
   mandate three evaluation points. Corrected in HANDOFF-02A/02B.
-- Neither panel has had human/DAW visual review; zero-CPU-impact is
-  structural, not profiled.
+- Neither panel has had human/DAW visual review. **Zero-CPU-impact is now
+  measured, not merely structural**: the Block Rotator report puts the
+  licensing gate at 0.20 ns/block against 48.9–86.4 ns/block for the load
+  measurer that D-N2 removed — the gate costs roughly 1/300th of what was
+  deleted alongside it.
+- ✦ **D1 — `cslicense` is not pinned** (raised by the HANDOFF-05 Block Rotator
+  report). It is consumed as a path dependency on the sibling working tree
+  (`CSLICENSE_DIR`), with no submodule and no recorded SHA. That is precisely
+  how a green suite went red with no commit in the plugin repo: `55e83ce`
+  changed empty-directory semantics to `TrialActive` and three plugin tests
+  asserting the old behaviour began failing. Harmless here, but a release
+  built this way is not reproducible. Options: pin as a submodule, or record
+  the expected SHA in each plugin and fail configure on mismatch. **Needs an
+  owner decision before release builds are cut.**
 - Production key and store URLs are still `TODO(release)` in both repos.
