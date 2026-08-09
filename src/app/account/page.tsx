@@ -95,7 +95,7 @@ export default function AccountPage() {
             </p>
             <p>
               Install on as many computers as you own. If you need a trial first,
-              take the <Link href="/trial">free 20-day trial</Link>.
+              try the <Link href="/trial">free demo</Link>.
             </p>
           </div>
         </div>

@@ -31,7 +31,7 @@ export default function Home() {
           <div className="section-header">
             <h2 className="section-title">Plugins</h2>
             <p className="section-subtitle">
-              Every plugin runs a free 20-day trial. One licence covers all the
+              Every plugin runs a free, fully functional demo. One licence covers all the
               computers you own — no dongle, no online activation.
             </p>
           </div>
@@ -64,7 +64,7 @@ export default function Home() {
                       Learn More
                     </Link>
                     <Link className="button secondary" href="/trial">
-                      Free Trial
+                      Free Demo
                     </Link>
                   </div>
                 </div>

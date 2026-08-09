@@ -54,7 +54,7 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                     Not yet on sale
                   </span>
                 )}
-                <Link className="button secondary" href="/trial">Free 20-day trial</Link>
+                <Link className="button secondary" href="/trial">Try the free demo</Link>
               </div>
 
               <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>

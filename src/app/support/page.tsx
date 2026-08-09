@@ -32,7 +32,7 @@ export default function SupportPage() {
               arrives by email immediately after payment.
             </p>
             <p>
-              Not ready to buy? Take the <Link href="/trial">free 20-day trial</Link>{' '}
+              Not ready to buy? Try the <Link href="/trial">free demo</Link>{' '}
               first — it&apos;s the full plugin, not a reduced version.
             </p>
 
@@ -77,11 +77,19 @@ export default function SupportPage() {
               to hardware.
             </p>
 
-            <h3>What happens when my trial ends?</h3>
+            <h3>What happens when a demo session ends?</h3>
             <p>
-              The plugin stops processing and passes audio through unchanged, and
-              the licence panel appears. Your projects still open and still play —
-              you just lose the effect until you buy.
+              The plugin fades out smoothly and passes audio through unchanged,
+              and the licence panel appears. Your projects still open and still
+              play — you just lose the effect. Reload the plugin and you get
+              another 20 minutes.
+            </p>
+
+            <h3>What is limited in the demo?</h3>
+            <p>
+              Only two things: sessions run for 20 minutes of processing, and
+              saving presets is disabled. Every algorithm and parameter works at
+              full quality, and nothing is watermarked or noised.
             </p>
 
             <h3>Do I need an internet connection?</h3>

@@ -7,9 +7,9 @@ import WipNotice from '../components/WipNotice';
 // This route is compiled into both plugins as kTrialUrl
 // (https://chromesphynx.com/trial) — it must keep working under this path.
 export const metadata: Metadata = {
-  title: 'Free 20-Day Trial — Chrome Sphynx Audio',
+  title: 'Free Demo — Chrome Sphynx Audio',
   description:
-    'Every Chrome Sphynx plugin runs free for 20 days. No sign-up, no licence request, no account.',
+    'Every Chrome Sphynx plugin runs as a fully functional demo: 20 minutes per session, preset saving disabled. No sign-up, no account.',
   alternates: { canonical: '/trial' },
 };
 
@@ -19,10 +19,10 @@ export default function TrialPage() {
       <section className="section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">Free 20-Day Trial</h2>
+            <h2 className="section-title">Free Demo</h2>
             <p className="section-subtitle">
-              No sign-up, no email required, nothing to request. Install the
-              plugin and it runs in full for 20 days.
+              The complete plugin, free to run for 20 minutes at a time. No
+              sign-up, no email, no account — just install it and go.
             </p>
           </div>
 
@@ -31,31 +31,40 @@ export default function TrialPage() {
 
             <h2>How it works</h2>
             <p>
-              Download and install. The first time you load the plugin it starts
-              its own 20-day trial — there is no licence to fetch and no form to
-              fill in. Everything runs on your machine; the plugin never contacts
-              us, then or later.
+              Install the plugin and load it in your DAW. It runs completely
+              unrestricted for 20 minutes of processing — every algorithm, every
+              parameter, full quality. Nothing is greyed out, watermarked, or
+              degraded, and no noise is injected into your audio.
             </p>
             <p>
-              The trial is the complete plugin. Nothing is disabled, degraded, or
-              watermarked while it runs, and a small badge shows how many days
-              remain.
+              A small badge counts the time down. When it reaches zero the plugin
+              fades out smoothly and passes audio through unprocessed; reload it
+              and you get another 20 minutes. The timer counts audio actually
+              processed, so a paused session doesn&apos;t consume it.
             </p>
 
-            <h2>When the trial ends</h2>
+            <h2>The one limit</h2>
             <p>
-              The plugin passes audio through unprocessed and shows its licence
-              panel. Your projects still open and still play — you simply lose
-              the effect until you enter a licence. Nothing is deleted, and your
-              presets stay where they are.
+              <strong>Saving presets is disabled in the demo.</strong> That is the
+              real boundary — you can explore the plugin as long as you like, but
+              you can&apos;t build a preset library or rely on it in finished work
+              until you buy. Your DAW sessions still save and reload normally.
+            </p>
+
+            <h2>Nothing to install, expire, or reset</h2>
+            <p>
+              There is no trial licence to request, no key to enter, and no clock
+              running down in the background. The demo doesn&apos;t write anything
+              to your machine and never contacts us — the plugin has no network
+              code in it at all.
             </p>
 
             <h2>Buying</h2>
             <p>
-              Purchase a licence and you receive it by email as a short text
-              block. Paste it into the plugin&apos;s licence panel and it unlocks
-              permanently — on every computer you own. There is no dongle, no
-              online activation, and no account to create.
+              A licence arrives by email as a short text block. Paste it into the
+              plugin&apos;s licence panel and it unlocks permanently, on every
+              computer you own — no dongle, no online activation, no account. The
+              timer and the preset restriction disappear for good.
             </p>
 
             <h2>Downloads</h2>

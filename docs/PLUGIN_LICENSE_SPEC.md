@@ -1,4 +1,29 @@
-# Chrome Sphynx License — Plugin Integration Spec (v2.0)
+# Chrome Sphynx License — Plugin Integration Spec (v3.0)
+
+> **v3.0 (2026-08-10) — session demo replaces the 20-day trial.**
+> An unlicensed plugin now runs a **fully functional 20-minute session demo
+> with preset saving disabled**, instead of a 20-day calendar trial.
+>
+> This is a net *simplification*. Deleted outright: `trial-start.txt`, the
+> 20-day arithmetic, the whole clock-rollback guard (`license-state.txt`,
+> `license-rollback.txt`, the 24 h tolerance, §6) and every fail-closed tamper
+> rule in the old §9. A sample counter cannot be defeated by moving the clock,
+> so that machinery has nothing left to defend. It also closes the real
+> weakness of the calendar trial: deleting one file restarted it, whereas a
+> session demo has no state to delete.
+>
+> **Responsibility moves.** `cslicense` no longer knows about trials or demos
+> at all — it answers one question: *is there a valid licence for this
+> product?* The demo timer belongs to the processor, because counting samples
+> needs a sample rate and a buffer, which the shared module has no view of.
+>
+> Owner decisions taken with this revision — override if you disagree:
+> **per-instance** timer rather than per-DAW-session (cross-instance
+> coordination buys friction, not protection); **dry passthrough** on expiry,
+> consistent with §4 and never a silent track; **countdown visible
+> throughout**, reusing the existing badge.
+>
+> Superseded: §6 entirely, and v2.0's §9 local calendar trial.
 
 > **v2.1 (2026-08-09) — normative cost model.** §5 is rewritten: a licensed
 > plugin performs **no licensing work at all** after construction — nothing in
@@ -111,10 +136,11 @@ macOS): presets follow the preset helper, licenses follow this rule.
 (v1.2 said "obtain from the PresetManager helper"; that failed on macOS
 where Block Rotator's preset base is `~/Library/Audio/Presets/CSPHX/…`.)
 
-On plugin load, discover `*.cslic` files in that directory (first *valid*
-file wins; prefer `full` over `trial` when both are valid). Accepted licenses
-(pasted or loaded) are stored there as `<product>.cslic` (trial:
-`<product>-trial.cslic`).
+On plugin load, discover `*.cslic` files in that directory; the first valid,
+unexpired `full` licence for this product wins. Accepted licences (pasted or
+loaded) are stored there as `<product>.cslic`. Since v3.0 nothing issues
+`trial`-type licences — the verifier still parses them, but only a perpetual
+`full` licence unlocks the plugin.
 
 Design note: a short typeable serial (`XXXX-XXXX-…`) is deliberately **not**
 supported — 64-byte Ed25519 signatures cannot fit one, and the symmetric
@@ -125,10 +151,12 @@ equivalent used by u-he/FabFilter-class vendors.
 
 | state | condition | audio | GUI |
 |-------|-----------|-------|-----|
-| `Licensed` | valid `full` license | normal | normal; licensee name in about box |
-| `TrialActive` | valid unexpired `trial` | normal | normal + unobtrusive "N days left" badge linking to the store |
-| `TrialExpired` | valid but expired `trial`, or rollback flag (§6) | **dry passthrough** (input copied to output, no processing) | locked panel: "Trial expired — Buy / Paste license / Load file" |
-| `Unlicensed` | no (valid) license file | dry passthrough | panel: "Start free 20-day trial / Buy / Paste license / Load file" |
+| `Licensed` | valid `full` licence | normal | normal; licensee name in about box |
+| `DemoActive` | no licence, demo budget remaining (§9) | normal | countdown badge `DEMO · 12:04`, linking to the store; preset **save** disabled |
+| `DemoExpired` | no licence, demo budget exhausted | **dry passthrough** (input copied to output, no processing) | locked panel: "Demo ended — Buy / Paste licence / Load file" |
+
+(v3.0 replaced `TrialActive`/`TrialExpired`/`Unlicensed`. There is no longer
+an "unlicensed but not demoing" state: absence of a licence *is* the demo.)
 
 Dry passthrough is implemented via the plugin's **existing** bypass-style
 early return in `processBlock` — never by new per-block processing. Never
@@ -223,15 +251,17 @@ predictor gets right every time. Removing it would require indirect dispatch
 replaces. One predictable load per buffer is the floor, and it is not
 measurable against any real DSP workload.
 
-## 6. Clock-rollback guard (trial only)
+## 6. Clock-rollback guard — REMOVED in v3.0
 
-Persist a high-water wall-clock mark in the license directory
-(`license-state.txt`, plain text, epoch seconds; rollback flag in
-`license-rollback.txt`): `hw = max(hw, now)` on every
-check. If `now < hw - 24h`, set a persistent `rollback` flag ⇒ state
-`TrialExpired` regardless of `expiresAt`. Full licenses ignore this entirely.
-The 24h tolerance forgives timezone/DST fixes; deleting the state file only
-helps an attacker if they also keep the clock rolled back for real.
+This section is deleted. It existed only to stop someone winding the system
+clock back to extend a 20-day calendar trial. The v3.0 demo counts **samples
+processed**, so the clock is irrelevant and there is nothing to guard.
+
+Implementations must remove `license-state.txt` and `license-rollback.txt`
+along with the tolerance logic. Existing files may be left on disk harmlessly;
+do not read them, and do not write new ones.
+
+Purchased licences are perpetual and were never affected by this guard.
 
 ## 7. Keys
 
@@ -319,55 +349,80 @@ fail at step 3.
 Regenerate vectors any time with this repo:
 `node scripts/license-cli.ts issue …` / `verify --pubkey <hex>`.
 
-## 9. Local trial (v2.0)
+## 9. Session demo (v3.0)
 
-The plugin owns the trial. No network, no licence file, no server.
+An unlicensed plugin is **fully functional for 20 minutes of processing per
+instance, with preset saving disabled**. There is no persistent state of any
+kind: no files, no timestamps, nothing to tamper with or delete.
 
-**State** lives beside the licence, in the directory from §3
-(`<Documents>/Chrome Sphynx Audio/<Display Name>/`):
+The demo lives entirely in the processor. `cslicense` is not involved — it
+reports `Licensed` or `Unlicensed` and knows nothing about demos.
 
-| File | Contents |
-|---|---|
-| `trial-start.txt` | epoch seconds of first run, plain text |
-| `license-state.txt` | existing high-water clock mark (§6) |
-| `license-rollback.txt` | existing rollback flag (§6) |
+### Counting
 
-**Rules**
+Count **samples processed**, never wall-clock time:
 
-1. On first evaluation with no valid licence and no `trial-start.txt`, write
-   the current time and enter `TrialActive` with the full 20 days.
-2. With `trial-start.txt` present, remaining = `20 days - (now - start)`.
-   `TrialActive` while positive, `TrialExpired` once not.
-3. An unparseable or future-dated `trial-start.txt` ⇒ `TrialExpired`. Fail
-   closed; never rewrite it, or deleting the contents would reset the trial.
-4. The §6 rollback guard applies unchanged: a persisted rollback flag forces
-   `TrialExpired` regardless of arithmetic.
-5. A valid `full` licence always wins — it is checked before any trial state,
-   and trial files are then irrelevant.
+```cpp
+demoSamplesRemaining_ -= numSamples;   // set to 20*60*sampleRate in prepareToPlay
+```
 
-**Cost rules (normative, per §5)**
+Sample counting is why §6's rollback guard is gone — the clock is irrelevant,
+so moving it achieves nothing. It also means a paused transport does not burn
+the demo, which is fairer than wall time.
 
-6. `trial-start.txt` is read **once**, at construction, and its value cached
-   in memory. `prepareToPlay` compares against the cached integer and never
-   re-reads the file.
-7. The §6 high-water mark is written **at most once per plugin instance**, at
-   construction, and **only while a trial is in effect**. A licensed plugin
-   writes nothing, ever. Repeatedly rewriting it on every evaluation — as a
-   naive reading of §6 would suggest — would put a file write on the host's
-   prepare path for no benefit.
-8. When a valid `full` licence is present, none of §9 executes at all: no
-   trial file is opened, no timestamp is compared, and `settled` is set so
-   `prepareToPlay` returns immediately.
+`prepareToPlay` sets the budget from the current sample rate. A host changing
+sample rate mid-session re-derives it; do **not** treat that as a reset —
+scale the remaining budget, or simply recompute from the fraction already
+consumed.
 
-**Threat model, stated plainly.** Deleting `trial-start.txt`, or reinstalling
-into a clean user-data directory, restarts the trial. This is accepted: it is
-casual deterrence, matching how indie audio software generally behaves, and
-the alternative (server-issued trials) cost a database and was defeated by a
-second email address anyway.
+### Expiry, without a click
 
-**States** are otherwise exactly §4 — a trial and a licence produce the same
-`TrialActive` / `Licensed` behaviour, and expiry still means dry passthrough,
-never silence.
+The gate flips *during* playback, which no other state in this spec does, so
+it needs a ramp — the one place §4's "no ramps" rule is deliberately relaxed:
+
+1. While `demoSamplesRemaining_ > 0`: process normally.
+2. On reaching zero: ramp output gain 1 → 0 over ~30 ms (about 1440 samples at
+   48 kHz), applied once.
+3. Once the ramp completes: latch `demoExpired_` and take the **existing**
+   bypass early-return — dry passthrough, never silence, exactly as §4.
+
+After step 3 the plugin is cheaper than a licensed one: it returns before any
+DSP runs. The ramp executes once per instance, in demo mode only, and never in
+a licensed build.
+
+### Preset saving
+
+Disable **preset saving only** — the "Save" path in the preset manager.
+
+**`getStateInformation` must keep working.** It is how the host stores plugin
+state in the project file; blocking it would break session recall and read as
+data loss rather than a demo limit. Only the user-facing preset save is
+refused, with a message pointing at the licence panel.
+
+### Cost rules (normative, per §5)
+
+1. When a valid licence is present, **none of §9 executes**: no counter is
+   decremented, no ramp exists, `settled` is set, and `prepareToPlay` returns
+   immediately. A paying customer pays nothing for the demo mechanism.
+2. In demo mode the per-block cost is one 64-bit subtract and one compare,
+   alongside the §4 atomic load. No clock call, no allocation, no I/O.
+3. The ramp is the only per-sample work, once per instance, ~30 ms.
+
+### States
+
+`Licensed` and `DemoActive` both process audio normally. `DemoExpired` is
+`TrialExpired` under a new name: dry passthrough plus the licence panel. The
+badge shows the countdown throughout — `DEMO · 12:04` — switching to a
+"demo ended" panel at zero.
+
+### Threat model, stated plainly
+
+Removing and re-adding the plugin grants another 20 minutes, and two instances
+on separate tracks each get their own. That is accepted and is not the point:
+**disabled preset saving is what prevents production use**, not the timer. The
+demo has no reset to find, no file to delete, and no clock to move — strictly
+more robust than the calendar trial it replaces, at the cost of uninterrupted
+long-session evaluation.
 
 ## 8. Shared C++ module placement
 

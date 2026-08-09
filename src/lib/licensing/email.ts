@@ -3,31 +3,25 @@
 
 import { SUPPORT_EMAIL, absoluteUrl } from '../site';
 
+// Only purchased licences are ever emailed. Since spec v3.0 the demo is a
+// 20-minute session timer inside the plugin, so there is no trial licence to
+// send and no expiry to state.
 interface SendArgs {
   to: string;
   productId: string;
   productName: string;
   license: string;
-  /** Trials state their expiry; full licences are perpetual. */
-  expiresAt?: string;
 }
 
-export function licenseEmailBody({ productName, license, expiresAt }: Omit<SendArgs, 'to' | 'productId'>): string {
-  const opening = expiresAt
-    ? `Thanks for trying ${productName}.\n\nYour trial licence (valid until ${expiresAt}):`
-    : `Thank you for buying ${productName}.\n\nYour licence:`;
-
-  const closing = expiresAt
-    ? `When the trial ends, ${productName} passes audio through unprocessed until you enter a purchased licence — your projects keep opening either way.`
-    : `This licence is perpetual and covers every computer you own. There is no ` +
-      `subscription and nothing to renew.`;
-
+export function licenseEmailBody({ productName, license }: Omit<SendArgs, 'to' | 'productId'>): string {
   return (
-    `${opening}\n\n${license}\n` +
+    `Thank you for buying ${productName}.\n\nYour licence:\n\n${license}\n` +
     `Copy the whole block above — including the BEGIN and END lines — and paste ` +
     `it into the plugin's licence panel. The same licence is attached as a file ` +
     `if you prefer "Load licence file".\n\n` +
-    `${closing}\n\n` +
+    `This licence is perpetual and covers every computer you own. There is no ` +
+    `subscription and nothing to renew, and the 20-minute demo limit and preset ` +
+    `restriction are gone for good.\n\n` +
     `Lost it? Retrieve it any time at ${absoluteUrl('/account')}\n` +
     `Need help? ${SUPPORT_EMAIL}\n\n` +
     `— Chrome Sphynx Audio`
@@ -45,9 +39,7 @@ export async function sendLicenseEmail(args: SendArgs): Promise<SendResult> {
     return 'skipped';
   }
 
-  const subject = args.expiresAt
-    ? `Your ${args.productName} trial licence`
-    : `Your ${args.productName} licence`;
+  const subject = `Your ${args.productName} licence`;
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -59,7 +51,7 @@ export async function sendLicenseEmail(args: SendArgs): Promise<SendResult> {
       text: licenseEmailBody(args),
       attachments: [
         {
-          filename: `ChromeSphynx-${args.productId}${args.expiresAt ? '-trial' : ''}.cslic`,
+          filename: `ChromeSphynx-${args.productId}.cslic`,
           content: Buffer.from(args.license, 'utf8').toString('base64'),
         },
       ],

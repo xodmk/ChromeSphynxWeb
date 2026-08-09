@@ -59,11 +59,12 @@ export default function TermsPage() {
 
             <h2>5. Trials</h2>
             <p>
-              We offer a free 20-day trial of each plugin. The trial starts when
-              you first load the plugin and runs on your own machine — there is
-              nothing to request and no sign-up. Trials are fully functional.
-              When a trial expires, the plugin stops processing audio and passes
-              it through unaltered until a licence is entered.
+              Each plugin may be used free of charge as a demo. The demo is fully
+              functional for 20 minutes of audio processing per session, with
+              preset saving disabled; it runs entirely on your own machine and
+              requires no sign-up. When a demo session ends, the plugin passes
+              audio through unaltered until a licence is entered. Reloading the
+              plugin begins a new demo session.
             </p>
 
             <h2>6. Refunds</h2>

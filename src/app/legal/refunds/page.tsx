@@ -28,11 +28,11 @@ export default function RefundsPage() {
 
             <h2>Try before you buy</h2>
             <p>
-              Every plugin has a free, fully functional{' '}
-              <Link href="/trial">20-day trial</Link>. We would much rather you
-              tested the plugin in your own projects, on your own machine, than
-              bought it hoping for the best. The trial is the same binary as the
-              paid version — nothing is disabled or degraded while it runs.
+              Every plugin has a <Link href="/trial">free demo</Link> — the same
+              binary as the paid version, unrestricted for 20 minutes per
+              session, with only preset saving disabled. We would much rather you
+              tested it in your own projects, on your own machine, than bought it
+              hoping for the best.
             </p>
 
             <h2>How to request a refund</h2>

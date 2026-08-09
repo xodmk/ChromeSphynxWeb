@@ -17,6 +17,7 @@ RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/
 | HANDOFF-04B | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` **+ `_INSTALL`** | n/a | **superseded** by 05 | Naming work folded into HANDOFF-05 |
 | HANDOFF-05 | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `55e83ce` | **verified** 2026-08-10 | Production key in, RFC key gone; `PRODUCT_NAME "BlockRotator"`; **VST3 class ID unchanged**; load measurer removed; 131/131 tests; production-signed licence cross-check passed |
 | HANDOFF-05 | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | — | **issued**, not yet run | Same brief |
+| HANDOFF-07 | Block Rotator first, then Poltergeist | each `*_PLUGX` | `057e809` | **issued** 2026-08-10 | Spec v3.0 session demo: 20-min per session, preset save disabled; replaces the calendar trial |
 | HANDOFF-06 | both installers | each `*_INSTALL` | n/a | **issued** 2026-08-10 | Installer copy still says "30-day trial" (actual 20) and names superseded files; EULA has no trial clause |
 | — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | changed by 04B only | Still license-agnostic; 04B updates the two upstream bundle keys; PLUGIN_LICENSE_URL later |
 | — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | changed by 04A only | Same |
@@ -29,7 +30,7 @@ four spec §4 UI states in a DAW — neither report claims it, and both describe
 what the code draws rather than what a host renders. Production key and store
 URLs also remain `TODO(release)` placeholders in both repos.
 
-Shared-module reference: `csphxAudioPLUGX/cslicense` @ **`55e83ce`**
+Shared-module reference: `csphxAudioPLUGX/cslicense` @ **`057e809`**
 (`954b766` → `d2c0006` PIC → `f3d6114` test option + doc refresh). Runtime
 behaviour is unchanged from `954b766` throughout — both deltas are build/doc only. Required by every consumer that links
 cslicense into a plugin target: VST3/AU are shared modules and a non-PIC static
