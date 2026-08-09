@@ -65,6 +65,14 @@ targets (HANDOFF-03 action 3).
   (`JucePlugin_Name`, what hosts display) is. The installer change is
   therefore two data keys, not a code change.
 
+- **D-N2 (CPU load measurer, 2026-08-09)**: **remove** the
+  `juce::AudioProcessLoadMeasurer` from Block Rotator's release build. It
+  timed every `processBlock` while `getCpuLoad()` was never called by
+  anything, so the result was discarded — two high-resolution clock reads per
+  block costing more than the whole licensing gate. Poltergeist never had one.
+  Carried by HANDOFF-05 T4c. If a CPU readout is wanted later, add it
+  deliberately and to both plugins.
+
 ## Production signing key (registered 2026-08-07)
 
 Public half — safe to publish, compiled into every released plugin:

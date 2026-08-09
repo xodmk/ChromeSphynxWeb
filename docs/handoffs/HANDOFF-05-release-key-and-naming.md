@@ -152,13 +152,25 @@ the result is discarded. Poltergeist has no equivalent, so the two plugins are
 also inconsistent.
 
 Two high-resolution clock reads per block cost meaningfully more than the
-entire licensing gate (one cached bool load). Default action, unless the owner
-says otherwise: **remove it from the release build** — the `ScopedTimer`, the
-`loadMeasurer_` member, the `reset()` in `prepareToPlay`, and `getCpuLoad()`.
+entire licensing gate (one cached bool load).
 
-If a CPU readout is wanted later it should be added deliberately and wired to
-the GUI, ideally in both plugins. Report the measured before/after difference
-if you can, using the measurer itself before deleting it.
+**Owner decision D-N2 (2026-08-09): remove it.** Delete all four sites —
+
+| File | Line (approx) | What |
+|---|---|---|
+| `plugin/source/PluginProcessor.cpp` | 280 | the `ScopedTimer` in `processBlock` |
+| `plugin/source/PluginProcessor.cpp` | 195 | `loadMeasurer_.reset(...)` in `prepareToPlay` |
+| `plugin/include/PluginProcessor.h` | 264 | the `juce::AudioProcessLoadMeasurer loadMeasurer_` member |
+| `plugin/include/PluginProcessor.h` | 187 | the `getCpuLoad()` accessor |
+
+Remove it outright rather than guarding it with `#if !NDEBUG`: nothing reads
+it, a debug build's timings would not be representative anyway, and git
+history preserves it if a CPU readout is ever wanted. If one is, it should be
+added deliberately and wired to the GUI in **both** plugins, not just this one.
+
+Before deleting, take a measurement if you reasonably can — report the load
+figure with the measurer in place, so the cost being removed is a number in
+the record rather than an estimate. Poltergeist needs no action here.
 
 ## T5 — Verify
 
