@@ -130,13 +130,15 @@ not forward (✦). Full context in the implementation record.
   licensing gate at 0.20 ns/block against 48.9–86.4 ns/block for the load
   measurer that D-N2 removed — the gate costs roughly 1/300th of what was
   deleted alongside it.
-- ✦ **D1 — `cslicense` is not pinned** (raised by the HANDOFF-05 Block Rotator
-  report). It is consumed as a path dependency on the sibling working tree
-  (`CSLICENSE_DIR`), with no submodule and no recorded SHA. That is precisely
-  how a green suite went red with no commit in the plugin repo: `55e83ce`
-  changed empty-directory semantics to `TrialActive` and three plugin tests
-  asserting the old behaviour began failing. Harmless here, but a release
-  built this way is not reproducible. Options: pin as a submodule, or record
-  the expected SHA in each plugin and fail configure on mismatch. **Needs an
-  owner decision before release builds are cut.**
+- ~~✦ **D1 — `cslicense` is not pinned**~~ — **RESOLVED 2026-08-11.** Each
+  plugin now carries `cmake/CslicensePin.cmake` recording the expected module
+  SHA and comparing it against actual HEAD at configure time
+  (`XodBlockRotator_PLUGX` `7ba45b1`, `XodPoltergeist_PLUGX` `73e2246`).
+  Mismatch is a FATAL_ERROR naming both SHAs and the two ways forward;
+  `-DCSLICENSE_ALLOW_SHA_MISMATCH=ON` is the development escape hatch; a
+  pinned-but-dirty module warns, and a non-git checkout warns and continues.
+  The check lives in the plugins, not in `cslicense`, so the module cannot
+  break its own verifier. **Adopting a newer cslicense means bumping
+  `CSLICENSE_EXPECTED_SHA` in the same commit that adapts the repo to it.**
+  Currently pinned: `057e809`.
 - Production key and store URLs are still `TODO(release)` in both repos.
