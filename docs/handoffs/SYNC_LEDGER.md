@@ -23,7 +23,7 @@ RELEASE work directory (2026-08-03): `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/
 | HANDOFF-05 | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `057e809` | **verified** 2026-08-11 | Run combined with 07 in one session (`cd25cba`): production key, `PRODUCT_NAME "Poltergeist"`, docs, cost model |
 | HANDOFF-07 | Block Rotator | `csphxAudioPLUGX/XodBlockRotator_PLUGX` | `057e809` | **verified** 2026-08-11 | `b35cb5a`; **135/135, zero failures**; demo §9 accounting measured at 0.62–0.73 ns/block |
 | HANDOFF-07 | Poltergeist | `csphxAudioPLUGX/XodPoltergeist_PLUGX` | `057e809` | **verified** 2026-08-11 | `cd25cba`; 247/256 — failing set **byte-identical** to the documented pre-existing nine (verified by master, not assumed); all 22 licensing/demo tests pass |
-| HANDOFF-06 | both installers | each `*_INSTALL` | n/a | **issued** 2026-08-10 | Installer copy still says "30-day trial" (actual 20) and names superseded files; EULA has no trial clause |
+| HANDOFF-06 | both installers | each `*_INSTALL` | n/a | **verified** 2026-08-11 | `d35c14b` / `c93c4bd`; demo copy, corrected user-data comment, EULA clause 4 DEMO. configure.sh + frontend build green |
 | — | Block Rotator installer | `csphxAudioPLUGX/XodBlockRotator_INSTALL` | n/a | changed by 04B only | Still license-agnostic; 04B updates the two upstream bundle keys; PLUGIN_LICENSE_URL later |
 | — | Poltergeist installer | `csphxAudioPLUGX/XodPoltergeist_INSTALL` | n/a | changed by 04A only | Same |
 
