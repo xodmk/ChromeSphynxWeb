@@ -1,6 +1,6 @@
 # NEXT_STEP — Chrome Sphynx Audio
 
-Status as of **2026-08-11**. Start here after a break, or in a new session.
+Status as of **2026-08-28**. Start here after a break, or in a new session.
 
 This repo is the **company-wide master** for e-commerce, licensing, and the
 website. Plugin and installer changes are **not** made from here — decisions
@@ -9,8 +9,77 @@ target repos, and the results are verified back here. See
 `docs/handoffs/SYNC_LEDGER.md` for what has been issued and verified, and
 `docs/handoffs/ORDER_OF_WORK.md` for sequencing.
 
-Release work lives in `/home/csphx/XODMK/xodCode/csphxAudioPLUGX/`.
-`csphxAudioVST3/` is the legacy dev directory — reference only.
+Release work lives in `~/XODMK/xodCode/xodCpp/csphxAudioPLUGX/`. The `_PLUGX`
+projects are the final RELEASE masters; they each carry the documentation set
+and the PDF generation script, and the `_INSTALL` projects are responsible for
+generating the PDFs from the master `build_docs.sh`.
+
+`csphxAudioVST3/` holds the `_VST3MSTR` projects. These are **temporary
+pre-license RELEASE masters**, standing in only until licensing is complete —
+which is itself blocked on Paddle and on the domain. They are **not** the
+master. Their doc files are currently *newer* than the `_PLUGX` copies; reading
+"newer" as "authoritative" inverts the intended flow and is the specific
+mistake to avoid.
+
+> Path note: earlier revisions of this file wrote these as
+> `/home/csphx/XODMK/xodCode/...`, which exists on no machine as written. The
+> real prefix is `~/XODMK/xodCode/xodCpp/`. Looking for the literal old path
+> leads to the false conclusion that the trees are absent.
+
+---
+
+## What we know vs. what we're inferring
+
+### Observed (measured 2026-08-28)
+
+- `chromesphynx.com` is registered, with DNS authoritative at Cloudflare
+  (`leonidas.ns.cloudflare.com` / `martha.ns.cloudflare.com` — Cloudflare's
+  randomly assigned nameserver pair, *not* project-specific names).
+- Cloudflare Email Routing is live at the DNS layer: `MX` →
+  `route{1,2,3}.mx.cloudflare.net`; `TXT` → `v=spf1
+  include:_spf.mx.cloudflare.net ~all`. Source: direct queries against 1.1.1.1.
+- The domain had **no `A`, `AAAA`, or `CNAME`** record on apex or `www`, so it
+  did not resolve at all. That — not a broken deployment — is what produced
+  `DNS_PROBE_POSSIBLE` in the browser.
+- The site itself is healthy: `chrome-sphynx-web.vercel.app` returns 200 on all
+  15 routes; `/api/webhooks/paddle` returns 405 (POST-only, correct); the WIP
+  notice renders and no Paddle checkout script loads — consistent with
+  `PURCHASING_ENABLED = false`.
+- `npm test` → **23/23 pass**, with no secrets configured.
+- The doc toolchain reproduces the shipped PDFs on this machine: pandoc 2.9.2.1,
+  XeTeX 3.141592653, python3 3.10.12, rsvg-convert 2.52.5, inkscape 1.1.2.
+  Rebuilding `Poltergeist_ProductPage.pdf` produced 444,725 bytes against the
+  committed 443,846 — normal PDF nondeterminism, not a content difference.
+- `github.com/xodmk` is a personal **User** account, not an organization. The
+  repo is **public**.
+- `~/.ssh/escheiSSHKey` (RSA 3072) is **not registered** on that account —
+  GitHub returns `Permission denied (publickey)` even when it is offered
+  directly. No git credential helper is configured either.
+- **None of the seven** plugin / installer / `cslicense` repos has a git remote.
+- `_PLUGX` has the three user-facing `.md` but **no `build_docs.sh`, no
+  `docs/gfx/`, no `docs/pdf/`** — it cannot currently build a PDF. The
+  `_INSTALL` projects contain zero references to `build_docs`, `pandoc`, or
+  `.pdf` in any script.
+
+### Working hypotheses (flagged — not confirmed)
+
+- The Vercel account slug is **not** `xodmk`. Building a dashboard URL from the
+  GitHub username gave a 404, but Vercel 404s rather than 403s on projects a
+  session cannot see, so that does not distinguish "wrong slug" from "wrong
+  account". Settle it by opening `vercel.com/dashboard` and reading the slug
+  from the address bar.
+- Cloudflare proxying is *expected* to break the Paddle webhook and deploy cache
+  coherence (see the warning below). This is reasoning from how the components
+  work, not an observed failure — no proxied request has been tested.
+
+### Deferred — and the measurement that resolves each
+
+| Question | What settles it |
+|---|---|
+| Does `chromesphynx.com` serve over TLS? | `curl -sSI https://chromesphynx.com` → 200, once the CNAME is live |
+| Does Paddle's webhook arrive intact? | sandbox `transaction.completed` → expect 200, not 403 |
+| Does a licence email actually arrive? | configure Resend, trigger `/api/account/resend`, check the inbox |
+| Do the plugins behave in a real DAW? | `docs/DAW_VERIFICATION_SCRIPT.md`, once per plugin per format |
 
 ---
 
@@ -32,6 +101,76 @@ Purchasing is gated behind a single switch: `PURCHASING_ENABLED` in
 `src/lib/status.ts`. Every buy button shows an amber "Work in progress — not
 yet on sale" notice and an inert control. **Flipping that one constant is the
 entire go-live action** for the site.
+
+### Domain and DNS — in progress
+
+The site was only ever reachable at `chrome-sphynx-web.vercel.app`; the domain
+resolved to nothing. Activation is two steps in two dashboards, and Cloudflare
+stays authoritative throughout:
+
+1. **Vercel** → project → Settings → Domains → add `chromesphynx.com`.
+2. **Cloudflare** → DNS → add:
+
+   | Type | Name | Target | Proxy |
+   |---|---|---|---|
+   | CNAME | `@` | `cname.vercel-dns.com` | **DNS only** (grey) |
+   | CNAME | `www` | `cname.vercel-dns.com` | **DNS only** (grey) |
+
+A CNAME at the apex is normally illegal; Cloudflare's CNAME flattening makes it
+work. Use the CNAME rather than an A record — Vercel assigns addresses per
+project and has changed them (`vercel.com` → `64.239.109.65`, `nextjs.org` →
+`216.230.86.1`), so a hardcoded IP goes stale. `cname.vercel-dns.com` tracks the
+right target automatically.
+
+> ### ⚠️ Two settings that will quietly break this
+>
+> **Do not delegate DNS to Vercel's nameservers.** When Vercel offers to manage
+> DNS, decline and keep Cloudflare. Cloudflare Email Routing only works while
+> Cloudflare is authoritative — delegating would kill
+> `support@chromesphynx.com` permanently (it cannot be recreated on Vercel DNS)
+> and drop the SPF record that licence email will depend on.
+>
+> **Do not enable Cloudflare's proxy (orange cloud).** Cloudflare's "proxying is
+> required for most security features" banner is generic advice for unprotected
+> origins; Vercel already provides CDN, TLS, and DDoS mitigation. Proxying adds
+> three specific hazards:
+> 1. **It breaks the deploy loop.** Cloudflare caches in front of Vercel and
+>    Vercel cannot purge it, so a successful deploy keeps serving the old site
+>    until the TTL expires — with no error anywhere.
+> 2. **It endangers the Paddle webhook.** Bot Fight Mode and WAF rules are
+>    designed to challenge automated POSTs to API paths. Paddle would get a
+>    challenge or 403 instead of reaching the route; the signature check in
+>    `src/lib/licensing/paddle.ts` is HMAC over the *raw* body, so anything that
+>    alters or blocks the request yields 403 and endless retries while the
+>    customer receives nothing.
+> 3. **It can stall TLS issuance**, producing certificate errors that look like
+>    an unrelated fault.
+>
+> If Cloudflare's WAF is wanted later, enable it only *after* a sandbox purchase
+> has succeeded, and add a cache-bypass rule for `/api/*` plus a WAF skip for
+> `/api/webhooks/*`. Then re-test the purchase.
+
+### Product documentation — published in this repo
+
+The finalized **v1.2** documents for both plugins now ship from this repo:
+
+- `public/docs/<plugin>/*.pdf` — served by Vercel at
+  `/docs/block-rotator/BlockRotator_UserGuide.pdf` and equivalents. Verified
+  returning 200 as `application/pdf`.
+- `docs/product/<plugin>/*.md` — the same content in source form, so site
+  development can read product wording without opening a PDF.
+- `public/docs/<plugin>/DOC_VERSION` — the version the PDFs were built from,
+  matching the `<!-- doc-version: X.Y -->` comment on line 1 of each `.md`.
+
+**These are snapshots, not masters.** `_PLUGX` remains the release master for
+the documents and `_INSTALL` generates PDFs for local builds; this repo carries
+the published copy so the website can link downloads and so site development can
+read the content. See `docs/product/README.md`. When updating a snapshot,
+replace the PDFs, the `.md`, and `DOC_VERSION` together so they never disagree.
+
+They were taken from `_VST3MSTR` because that tree holds the only built PDFs —
+`_PLUGX` has no `pdf/` at all. That is a gap in `_PLUGX`, not a change of
+master.
 
 ### Licensing — stateless, no database
 
@@ -84,9 +223,21 @@ SHAs instead of a mystery compile error.
    `.pkg`, no `.deb`/`.rpm`/AppImage. There is currently nothing to sell.
 4. **Email sending is not configured.** `RESEND_API_KEY` is unset. See the
    warning below — this one bites silently.
-5. **Unverified, worth checking:** whether `chromesphynx.com` is attached to the
-   Vercel project, and whether `support@chromesphynx.com` routing was completed
-   in Cloudflare. Both were set up mid-session but never confirmed end to end.
+5. **Domain not yet serving.** *Resolved from "unverified" on 2026-08-28.*
+   `support@chromesphynx.com` routing **is** complete — the Cloudflare MX and
+   SPF records are live. `chromesphynx.com` was **not** attached to Vercel: the
+   domain had no `A`/`AAAA`/`CNAME` record at all. The domain has since been
+   added in Vercel; the Cloudflare CNAME is the remaining step. See "Domain and
+   DNS" above.
+6. **Nothing outside this repo can reach another machine.** All seven plugin,
+   installer, and `cslicense` repos are git repos with **no remote configured**.
+   Only `ChromeSphynxWeb` is on GitHub. Documentation now transfers because it
+   is published here; plugin *source* still moves only by hand.
+7. **`_PLUGX` cannot build its own documentation.** It holds stale copies of the
+   three user-facing `.md` and has no `build_docs.sh`, no `docs/gfx/`, and no
+   `docs/pdf/`. The `_INSTALL` projects reference PDF generation nowhere. The
+   arrangement described at the top of this file is the intended target, not the
+   current state.
 
 > **Email is a launch blocker, not a nicety.** Without `RESEND_API_KEY`, a real
 > purchase generates a correct licence, fails to email it, and returns 500 — so
@@ -140,8 +291,48 @@ edits, which is what keeps the repos from drifting.
    `/api/webhooks/paddle` for `transaction.completed`.
 5. End-to-end sandbox purchase: checkout → webhook → licence email → paste into
    the plugin → unlocked.
-6. Publish downloads on the product pages.
+6. Publish downloads on the product pages. The PDFs are already in the repo and
+   already served — this is now only a link from
+   `src/app/plugins/[slug]/page.tsx` to `/docs/<plugin>/<file>.pdf`.
 7. Flip `PURCHASING_ENABLED` to `true`.
+
+---
+
+## Working across machines
+
+**Vercel and Cloudflare changes are not files.** DNS records live on
+Cloudflare's servers and domain settings and environment variables live on
+Vercel's; both are already visible from any machine you log into. There is
+nothing to commit or sync for either. Only repository files travel through git.
+
+Before the first push from a new machine, authentication has to exist — neither
+path currently works on the Linux box:
+
+- The remote is HTTPS with **no credential helper**, and GitHub rejects account
+  passwords; a Personal Access Token is required.
+- `~/.ssh/escheiSSHKey` is **not registered** on the `xodmk` account.
+
+To use SSH, register `~/.ssh/escheiSSHKey.pub` at `github.com/settings/keys`,
+then point the remote at it and pin the identity (the key has a non-standard
+filename, so SSH will not offer it automatically):
+
+```
+git remote set-url origin git@github.com:xodmk/ChromeSphynxWeb.git
+printf 'Host github.com\n  IdentityFile ~/.ssh/escheiSSHKey\n  IdentitiesOnly yes\n' >> ~/.ssh/config
+```
+
+On the receiving machine:
+
+```
+git clone git@github.com:xodmk/ChromeSphynxWeb.git
+cd ChromeSphynxWeb && npm install
+vercel link && vercel env pull .env.local   # secrets, for local licence signing
+```
+
+`.env.local` is gitignored deliberately. Secrets come from Vercel, never from
+git — `vercel env pull` is the whole distribution mechanism, and it is how
+`CS_LICENSE_PRIVATE_KEY` reaches a second machine without ever entering the
+repository.
 
 ---
 
@@ -150,6 +341,18 @@ edits, which is what keeps the repos from drifting.
 - **Commits must be pushed.** Vercel deploys from the GitHub remote; committing
   locally changes nothing that anyone can see.
 - **Vercel env vars only apply to new deployments.** After adding one, redeploy.
+- **The Vercel dashboard slug is not the GitHub username.** Hand-building
+  `vercel.com/xodmk/...` returns 404. Open `vercel.com/dashboard` and click
+  through; Vercel 404s rather than 403s on anything your session cannot see, so
+  a 404 never tells you whether it is the wrong slug or the wrong account.
+- **Cloudflare's nameserver names are random first names** — `leonidas`,
+  `martha`. They carry no meaning and nothing about them needs configuring;
+  seeing them only confirms the domain's DNS is hosted at Cloudflare.
+- **Whoever holds the nameservers owns every record on the domain** — web,
+  email, and verification tokens alike. Cloudflare already holds working email
+  records, so Cloudflare keeps the nameservers and Vercel gets pointed to.
+- **This repo is public.** Anything committed to `public/` is world-readable the
+  moment it is pushed, the product PDFs included.
 - **Adopting a newer `cslicense` means bumping `CSLICENSE_EXPECTED_SHA`** in the
   same commit that adapts the plugin to it. The pin exists because the module
   silently broke both plugins once.
