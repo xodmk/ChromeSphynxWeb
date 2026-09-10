@@ -151,7 +151,7 @@ equivalent used by u-he/FabFilter-class vendors.
 
 | state | condition | audio | GUI |
 |-------|-----------|-------|-----|
-| `Licensed` | valid `full` licence | normal | normal; licensee name in about box |
+| `Licensed` | valid `full` licence | normal | normal; key icon top-right opens a read-only licence view (licensee, email, order) |
 | `DemoActive` | no licence, demo budget remaining (§9) | normal | countdown badge `DEMO · 12:04`, linking to the store; preset **save** disabled |
 | `DemoExpired` | no licence, demo budget exhausted | **dry passthrough** (input copied to output, no processing) | locked panel: "Demo ended — Buy / Paste licence / Load file" |
 
@@ -174,14 +174,40 @@ never changes during continuous playback. (v1.3's "click-free ramp"
 requirement is withdrawn — it induced per-block crossfade machinery, which
 violates this budget.)
 
-UI styling (carried over from license-spec v3 §7): Licensed shows nothing —
-identical to a license-free plugin. TrialActive shows a small
-"TRIAL · N days remaining" pill in gold `#c8a23a` (amber + hours at ≤24h)
-beside a key-icon button that opens the license panel. TrialExpired /
-Unlicensed auto-open the panel when the editor opens; it is not dismissable
-while unlicensed. "Get your license" opens the store URL in the default
-browser. Serial auto-format from v3 does not apply — the paste box takes the
-whole armored block.
+UI styling (v3.0 — this paragraph was stale text carried over from
+license-spec v3 §7, which still named the removed `TrialActive` /
+`TrialExpired` / `Unlicensed` states and a day-based trial pill; corrected
+2026-09-10 to describe the states in the table above and the shipped
+behaviour):
+
+- **Licensed** — no countdown pill and no unlock form. The only licensing
+  affordance is the key icon (below); opening it shows a read-only view of the
+  installed licence — licensee, email, order id, and perpetual-vs-expiry.
+  This is what satisfies the table's "licensee name in about box": without it
+  a paying customer has no way to confirm the licence registered. v3.0's
+  earlier wording ("identical to a license-free plugin") is superseded — a
+  single 18 px icon is the deliberate cost of that confirmation.
+- **DemoActive** — a small `DEMO · MM:SS` countdown pill in gold `#c8a23a`,
+  turning amber `#e08a2b` in the final **60 seconds**. The panel is
+  dismissable. While it is closed only the key icon is hit-tested, so the
+  editor underneath stays fully usable.
+- **DemoExpired** — the panel **auto-opens when the editor opens and cannot be
+  dismissed** (no close button). Title reads "Demo ended" over the note that
+  audio passes through unprocessed.
+
+**The key icon.** A small (18 px) key glyph pinned to the **top-right corner**
+of the editor, drawn as a path rather than shipped as an image asset. It is
+present in **every** state, licensed included, and is the single entry point to
+the licence panel. It is hidden only while that panel is already open. It sits
+opposite the countdown pill (top-left) so it never shifts as the countdown text
+changes width, and it is the only region hit-tested while the panel is closed.
+
+"Buy" opens the store URL in the default browser; that URL is this product's
+own page, not the site root, because the checkout overlay lives on the product
+page. Serial auto-format from v3 does not apply — the paste box takes the
+whole armored block. The paste box, clipboard, file-load and Buy controls are
+**hidden when licensed** — offering an unlock form to someone already licensed
+only invites them to break a working install.
 
 ## 5. Evaluation points & the settled gate (v2.1 — normative cost model)
 
