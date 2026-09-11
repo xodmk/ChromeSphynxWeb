@@ -1,6 +1,14 @@
 # NEXT_STEP — Chrome Sphynx Audio
 
-Status as of **2026-08-28**. Start here after a break, or in a new session.
+Status as of **2026-09-10**. Start here after a break, or in a new session.
+The body below was written 2026-08-28; the 2026-09-03 and 2026-09-10
+measurements are in "Observed" and the claims they overturn are corrected in
+place.
+
+> **2026-09-10 in one line:** the plugin side moved, the commerce side did not.
+> Block Rotator is licensing-complete and packaged for Linux; Poltergeist's
+> licensing was rebuilt after being stripped by a tree refresh. Paddle, Resend,
+> `www` and the checkout are exactly where 2026-09-03 left them.
 
 This repo is the **company-wide master** for e-commerce, licensing, and the
 website. Plugin and installer changes are **not** made from here — decisions
@@ -61,6 +69,108 @@ mistake to avoid.
   `_INSTALL` projects contain zero references to `build_docs`, `pandoc`, or
   `.pdf` in any script.
 
+### Observed (measured 2026-09-03)
+
+Re-measured after a machine crash. Nothing was lost: `ChromeSphynxWeb` has a
+clean working tree, and every `_PLUGX` / `_INSTALL` / `cslicense` repo is
+committed at the same HEAD the ledger records.
+
+- **The domain now serves.** `chromesphynx.com` resolves to `66.33.60.193` /
+  `76.76.21.241` (Cloudflare CNAME flattening, so the apex answers with `A`
+  records) and returns **200** over HTTPS. Nameservers are unchanged at
+  Cloudflare. The Cloudflare CNAME step described below is **done**.
+- **`www.chromesphynx.com` is broken.** DNS is correct — it answers
+  `cname.vercel-dns.com`, then the same two Vercel addresses — but the
+  certificate Vercel serves carries `CN = chromesphynx.com` with a single SAN,
+  `DNS:chromesphynx.com`. `www` is absent, so HTTPS fails to negotiate
+  (`curl` exit 60). `http://www` still issues a 308 to `https://www`, which
+  then dead-ends. A visitor typing `www.` gets a browser security warning, not
+  the site.
+- **The two newest commits are not on the remote.** `git fetch` confirms
+  `main` is ahead of `origin/main` by `074f32d` (the v1.2 PDF publication) and
+  `f7527ef` (this file). Consequence, measured against the live site: every
+  published PDF path 404s —
+  `/docs/block-rotator/BlockRotator_UserGuide.pdf`,
+  `/docs/poltergeist/Poltergeist_UserGuide.pdf` and the `DOC_VERSION` files all
+  return `404 text/html`.
+- **Push is still unauthenticated.** `origin` is HTTPS, no credential helper is
+  configured, `~/.ssh/config` does not exist, and `~/.ssh/escheiSSHKey` is
+  present but still unregistered. This is the one thing standing between the
+  committed work and the live site.
+- `PURCHASING_ENABLED` is still `false` in `src/lib/status.ts` — unchanged, as
+  intended.
+
+### Observed (measured 2026-09-10)
+
+A plugin-side session. Nothing about Paddle, DNS, Resend or the checkout moved;
+everything below is the C++ trees and this repo's spec copy.
+
+**Push is no longer a blocker.** `main` was pushed to `origin/main`
+(`caf4d46..aabb73e`). The four commits that had never left this disk — the
+product PDFs, the doc-publishing commit, the launch spec, and today's spec
+correction — are now on GitHub, so the PDFs deploy and this file is readable
+from another machine. That overturns the 2026-09-03 finding above.
+
+**Executable bits had been stripped from 31 tracked shell scripts** across
+`XodBlockRotator_INSTALL`, `XodPoltergeist_INSTALL` and `XodPoltergeist_PLUGX`
+(mode `100755` → `100644`, zero content change — a copy across a filesystem
+that dropped permissions). No `./build.sh` could run in any of them. Restored;
+the working trees then matched their index again. **It recurred in
+`XodPoltergeist_PLUGX` after that tree was refreshed**, so treat it as a
+symptom of how these trees are copied, not a one-off.
+
+**Block Rotator — licensing UI completed and shipped.** Spec §4 asked for the
+licensee name "in an about box"; there was no about box, and no route to one,
+because `LicensePanel` hid both itself *and* the KEY button once licensed. A
+paying customer had no way to confirm the licence registered. Replaced with an
+18 px key glyph pinned **top-right**, drawn as a `juce::Path` (no image asset),
+present in **every** state including Licensed and hidden only while the panel
+it opens is already up. Opening it while licensed shows a read-only view:
+licensee, email, order id, perpetual-vs-expiry. The unlock form is hidden when
+licensed. Suite went 172/172, determinism gate pass, 10/10 headers standalone.
+Committed as `6197ef8`.
+
+**Block Rotator has been packaged for the first time.** `Linux/` previously
+held only `.gitkeep`. Now carries `.deb` (7,883,016), `.rpm` (7,883,625) and
+`.AppImage` (86,731,256) at v1.0.0. The chain was verified byte-identical at
+every hop — PLUGX `BUILD/` → `prepare-plugin.sh` staged payload → the binary
+extracted back out of the `.deb`, all md5 `895ce3a6a4546672cb529a88808d94ae`,
+the same build the 172 tests ran against. That closes the stale-binary defect
+class for this artefact: the payload now postdates its own `LicensePanel.cpp`.
+
+**Poltergeist had its licensing deliberately removed, and it has been
+re-integrated.** The tree was refreshed from the pre-licence development
+project. Absent from the working tree: all five licensing sources, both
+`Licensing/` directories, every licensing reference in `PluginProcessor` and
+`PluginEditor`, every `cslicense` CMake reference, **and the entire `tests/`
+directory**. A build from that tree was a permanently-free plugin. Licensing
+was rebuilt from Block Rotator as the reference, so the two now share one
+structure (`namespace xodlic`, flat `plugin/include/`, standalone
+`SessionDemo`). Licensing suite: **21/21 green**.
+
+**Two D-L1/D-N1 naming decisions had been reverted by that refresh**, both
+caught by building and testing rather than by reading:
+
+- `PRODUCT_NAME` was back to `xodPoltergeist` (HEAD had `Poltergeist` from
+  `0873501`), so the build emitted `xodPoltergeist.vst3` while the installer
+  expects `Poltergeist.vst3`. Restored.
+- `presets.cpp` wrote user presets to `<Documents>/Chrome Sphynx Audio/Spectral
+  Ghost/` while licences resolve to `…/Poltergeist/` — one product's user data
+  split across two folders, with the DSP codename leaking into a user-facing
+  path. Fixed, **with a one-time migration** (see "Facts worth not
+  rediscovering").
+
+**Poltergeist is now at 1.0.0** in all five places, including
+`plugin/CMakeLists.txt`'s sub-project version — which is the one JUCE reports
+to the host, and the one easiest to miss.
+
+**Spec §4's "UI styling" paragraph was stale** and had been since v3.0. It
+still described `TrialActive`/`TrialExpired`/`Unlicensed` and a day-based trial
+pill, none of which exist. It is the paragraph an implementer reads when wiring
+the licence UI, so it would have misdirected the Poltergeist work in exactly
+the place the two plugins must match. Corrected in this repo's master copy
+(`aabb73e`) and synced to Block Rotator; both copies byte-identical.
+
 ### Working hypotheses (flagged — not confirmed)
 
 - The Vercel account slug is **not** `xodmk`. Building a dashboard URL from the
@@ -80,6 +190,10 @@ mistake to avoid.
 | Does Paddle's webhook arrive intact? | sandbox `transaction.completed` → expect 200, not 403 |
 | Does a licence email actually arrive? | configure Resend, trigger `/api/account/resend`, check the inbox |
 | Do the plugins behave in a real DAW? | `docs/DAW_VERIFICATION_SCRIPT.md`, once per plugin per format |
+| Does the §4 key icon render where it is supposed to? | Load the Block Rotator `.deb` build in a host. Its position is arithmetic, never observed — 18 px at (694, 8) in a fixed 720×660 editor |
+| **Do the production keypair halves actually match?** | `CS_LICENSE_PRIVATE_KEY=… node scripts/license-cli.ts issue --type full --product block-rotator --out /tmp/t.cslic`, then `verify --file /tmp/t.cslic --pubkey deda76f2…` (spec §7.1). **Never run.** A mismatch fails looking exactly like "my licence doesn't work", after a customer has paid |
+| Does Poltergeist still need its DSP/golden suite, or will the development project supply one? | Ask before rebuilding it; `tests/CMakeLists.txt` currently declares licensing tests only |
+| Does the Poltergeist preset migration behave on a real library? | Only ever run against an empty legacy folder (2026-09-10). Test with actual `.xrp` files present before shipping |
 
 ---
 
@@ -102,7 +216,13 @@ Purchasing is gated behind a single switch: `PURCHASING_ENABLED` in
 yet on sale" notice and an inert control. **Flipping that one constant is the
 entire go-live action** for the site.
 
-### Domain and DNS — in progress
+### Domain and DNS — apex live, `www` still broken
+
+> **Status 2026-09-03:** both steps below were completed for the apex and it
+> now serves. `www` was given its Cloudflare CNAME but never added in Vercel,
+> so Vercel's certificate does not cover it and HTTPS on `www` fails. Repeat
+> step 1 for `www.chromesphynx.com`. Everything else in this section is
+> retained because the two warnings still apply.
 
 The site was only ever reachable at `chrome-sphynx-web.vercel.app`; the domain
 resolved to nothing. Activation is two steps in two dashboards, and Cloudflare
@@ -154,9 +274,12 @@ right target automatically.
 
 The finalized **v1.2** documents for both plugins now ship from this repo:
 
-- `public/docs/<plugin>/*.pdf` — served by Vercel at
-  `/docs/block-rotator/BlockRotator_UserGuide.pdf` and equivalents. Verified
-  returning 200 as `application/pdf`.
+- `public/docs/<plugin>/*.pdf` — intended to be served by Vercel at
+  `/docs/block-rotator/BlockRotator_UserGuide.pdf` and equivalents. **They are
+  not live yet:** as of 2026-09-03 every one of those paths returns 404,
+  because the commit that adds them has never been pushed. An earlier revision
+  of this file claimed they were verified at 200 as `application/pdf`; that was
+  measured locally, not against the deployed site. Pushing resolves it.
 - `docs/product/<plugin>/*.md` — the same content in source form, so site
   development can read product wording without opening a PDF.
 - `public/docs/<plugin>/DOC_VERSION` — the version the PDFs were built from,
@@ -185,15 +308,27 @@ The production key is generated and registered. Public half:
 half lives only in Vercel (`CS_LICENSE_PRIVATE_KEY`, confirmed live) and your
 password manager — **losing it invalidates every licence ever issued.**
 
-### Plugins — both at spec v3.0, verified
+### Plugins — both at spec v3.0 (table refreshed 2026-09-10)
 
 | | Block Rotator | Poltergeist |
 |---|---|---|
-| Tests | 135/135, zero failures | 247/256 — the nine are pre-existing DSP/golden tests, verified byte-identical |
-| Production key | in | in |
-| `PRODUCT_NAME` | `BlockRotator` | `Poltergeist` |
-| Session demo | yes | yes |
-| `cslicense` pin | `7ba45b1` | `73e2246` |
+| Tests | **172/172**, zero failures; determinism gate pass | **21/21 licensing** — see the caveat below |
+| Production key | in | in (identical constant, verified against BR's) |
+| `PRODUCT_NAME` | `BlockRotator` | `Poltergeist` (reverted by the refresh, restored) |
+| Version | 1.0.0 | 1.0.0 (was 0.1.0) |
+| Session demo | yes, standalone `SessionDemo` | yes, same class after re-integration |
+| Key icon (§4) | yes, top-right, all states | yes, ported |
+| `kBuyUrl` | `/plugins/block-rotator` | `/plugins/poltergeist` |
+| Linux package | **built** — deb/rpm/AppImage | not built |
+| `cslicense` pin | `7ba45b1` | `73e2246` (verified at `057e809`) |
+
+> **Poltergeist's DSP/golden suite is missing, not passing.** The 247/256 figure
+> in earlier revisions of this file described a tree that no longer exists — the
+> refresh removed `tests/` entirely. What was rebuilt is a licensing-only
+> `tests/CMakeLists.txt`; the DSP, algorithm and golden tests are **absent** and
+> were deliberately not re-declared, on the assumption the development project
+> supplies its own. Do not read 21/21 as equivalent to Block Rotator's 172/172.
+> Restoring that suite is an open item.
 
 Unlicensed plugins run a **fully functional 20-minute session demo with preset
 saving disabled**. A licensed plugin does **no licensing work at all** —
@@ -219,21 +354,34 @@ SHAs instead of a mystery compile error.
 2. **No human has opened either plugin in a DAW.** Every state is verified by
    unit test and disassembly; none has been *seen*. Script ready at
    `docs/DAW_VERIFICATION_SCRIPT.md`.
-3. **No release builds exist.** Nothing is installable — no signed/notarised
-   `.pkg`, no `.deb`/`.rpm`/AppImage. There is currently nothing to sell.
+3. ~~**No release builds exist.**~~ **Partly done (2026-09-10).** Block Rotator
+   now has Linux `.deb`, `.rpm` and `.AppImage` at v1.0.0, carrying a payload
+   verified byte-identical to the tested build. Still missing: **Poltergeist's
+   Linux package** (the plugin builds and its licensing passes, but
+   `prepare-plugin.sh` and `build.sh` have not been run in its `_INSTALL`
+   tree), and **every macOS artefact** for both plugins — signed and notarised
+   `.pkg` can only be produced on the Mac, with the Developer ID certs.
 4. **Email sending is not configured.** `RESEND_API_KEY` is unset. See the
    warning below — this one bites silently.
-5. **Domain not yet serving.** *Resolved from "unverified" on 2026-08-28.*
-   `support@chromesphynx.com` routing **is** complete — the Cloudflare MX and
-   SPF records are live. `chromesphynx.com` was **not** attached to Vercel: the
-   domain had no `A`/`AAAA`/`CNAME` record at all. The domain has since been
-   added in Vercel; the Cloudflare CNAME is the remaining step. See "Domain and
-   DNS" above.
+5. ~~**Domain not yet serving.**~~ **Done, apex only (2026-09-03).**
+   `chromesphynx.com` resolves and returns 200; `support@chromesphynx.com`
+   routing was already complete. What remains is `www`: add
+   `www.chromesphynx.com` in **Vercel** → Settings → Domains (redirect to the
+   apex). The Cloudflare `www` CNAME already exists, but Vercel will not issue
+   a certificate for a hostname it has not been told about, so `www` currently
+   fails TLS outright. Do **not** fix this by removing the `www` record — that
+   trades a warning for a dead name.
 6. **Nothing outside this repo can reach another machine.** All seven plugin,
    installer, and `cslicense` repos are git repos with **no remote configured**.
    Only `ChromeSphynxWeb` is on GitHub. Documentation now transfers because it
    is published here; plugin *source* still moves only by hand.
-7. **`_PLUGX` cannot build its own documentation.** It holds stale copies of the
+7. ~~**The published PDFs are committed but not deployed.**~~ **Done
+   (2026-09-10).** `main` was pushed (`caf4d46..aabb73e`) and is level with
+   `origin/main`. The eight product PDFs are on GitHub and deploy with the
+   site. Note this made them world-readable — intended, but now actually true.
+   **The plugin trees still have no remotes**, so the C++ source — including
+   today's licensing work — exists on one disk only.
+8. **`_PLUGX` cannot build its own documentation.** It holds stale copies of the
    three user-facing `.md` and has no `build_docs.sh`, no `docs/gfx/`, and no
    `docs/pdf/`. The `_INSTALL` projects reference PDF generation nowhere. The
    arrangement described at the top of this file is the intended target, not the
@@ -249,6 +397,20 @@ SHAs instead of a mystery compile error.
 ---
 
 ## The next step
+
+> **Picking this up after 2026-09-10.** Track 2 below is now cheap to start:
+> Block Rotator has an installable `.deb`/`.rpm`/`.AppImage`, so the DAW pass no
+> longer needs a build first. It is also the single highest-value open item,
+> because the key icon added on 2026-09-10 has **never been seen rendered** —
+> its placement is arithmetic (18 px at 694,8 in a 720×660 editor whose top
+> strip centres its controls at x≈113–607), not observation.
+>
+> Two smaller things are queued behind it, both plugin-side and both recorded
+> in "Observed (measured 2026-09-10)": package Poltergeist for Linux, and
+> decide whether to restore Poltergeist's DSP/golden test suite. Neither blocks
+> Track 1.
+>
+> Nothing in the Poltergeist tree is committed yet.
 
 **Two tracks. Start both now — neither blocks the other.**
 
@@ -292,7 +454,7 @@ edits, which is what keeps the repos from drifting.
 5. End-to-end sandbox purchase: checkout → webhook → licence email → paste into
    the plugin → unlocked.
 6. Publish downloads on the product pages. The PDFs are already in the repo and
-   already served — this is now only a link from
+   will be served once the pending commits are pushed — this is now only a link from
    `src/app/plugins/[slug]/page.tsx` to `/docs/<plugin>/<file>.pdf`.
 7. Flip `PURCHASING_ENABLED` to `true`.
 
@@ -361,5 +523,35 @@ repository.
   Block Rotator alongside it.
 - **`getStateInformation` must never be blocked** by the demo. It is host
   session state, not preset saving; blocking it reads as data loss.
+- **A tree refresh from the development project silently removes licensing.**
+  It happened to Poltergeist on 2026-09-10: five sources, both `Licensing/`
+  dirs, all `cslicense` CMake wiring, every reference in the processor and
+  editor, and the whole `tests/` directory — leaving a build that is a
+  permanently-free plugin with no gate and no demo. It also reverted two
+  committed naming decisions (`PRODUCT_NAME`, and the preset directory). After
+  ANY such refresh, verify: `grep -rn cslicense CMakeLists.txt
+  plugin/CMakeLists.txt`, that `plugin/include/LicenseConfig.h` exists, and
+  that the build emits the bundle name `plugin.config.sh` expects.
+- **Poltergeist's preset directory moved, with a one-time migration.** Presets
+  used to live at `<Documents>/Chrome Sphynx Audio/Spectral Ghost/`; D-L1 makes
+  that a DSP-core codename that must not appear in a user-facing path, and
+  licences always resolved to `…/Poltergeist/`. `PresetManager` now migrates on
+  first run — **rename only, never merge, never delete**, and only when the new
+  folder does not already exist. A failed migration leaves the old folder
+  untouched and creates an empty new tree, so presets are always recoverable by
+  hand. Verified live on 2026-09-10: the legacy folder moved and the
+  neighbouring `Block Rotator/` library (45 files) was untouched.
+- **Spec §7.2 Vector A is a *block-rotator* trial and Vector B is a
+  *poltergeist* full licence.** They are not interchangeable: each is the wrong
+  product for the other plugin's build and must be rejected at §2 step 4. A
+  test ported between the two plugins without swapping vectors will either fail
+  or pass vacuously.
+- **`juce_add_plugin` reports the SUB-project version**, the one in
+  `plugin/CMakeLists.txt`, not the root `project()` version. Bumping only the
+  root leaves the host showing the old number.
+- **Executable bits do not survive however these trees are being copied.** Seen
+  twice on 2026-09-10, on 31 scripts and then again after a refresh. If
+  `./build.sh` reports "Permission denied", it is this, and `git diff` will
+  show mode-only changes with zero content diff.
 - Legal drafts follow Paddle's requirements and standard practice for
   downloadable software, but they have not been reviewed by a lawyer.
