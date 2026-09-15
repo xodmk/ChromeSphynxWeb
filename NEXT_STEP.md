@@ -1,557 +1,336 @@
 # NEXT_STEP — Chrome Sphynx Audio
 
-Status as of **2026-09-10**. Start here after a break, or in a new session.
-The body below was written 2026-08-28; the 2026-09-03 and 2026-09-10
-measurements are in "Observed" and the claims they overturn are corrected in
-place.
+Status as of **2026-09-14**. Start here after a break, or in a new session.
 
-> **2026-09-10 in one line:** the plugin side moved, the commerce side did not.
-> Block Rotator is licensing-complete and packaged for Linux; Poltergeist's
-> licensing was rebuilt after being stripped by a tree refresh. Paddle, Resend,
-> `www` and the checkout are exactly where 2026-09-03 left them.
+This revision replaces the 2026-09-10 file rather than adding to it. That file's
+Paddle section was built on a false premise (below). Earlier revisions are in
+git: `git show bdf0efb:NEXT_STEP.md`.
+
+> **2026-09-14 in one line:** the Paddle account exists and has for about a
+> month, but **nothing is connected to it**. There is no checkout code, the
+> production webhook reports `not configured`, this machine has no link to the
+> Vercel project, and the Paddle Claude Code plugin was never installed.
+
+> ### Correction: "No Paddle account exists" was wrong
+>
+> Every revision from 2026-08-28 to 2026-09-10, and the launch spec
+> (`docs/superpowers/specs/2026-09-07-paddle-launch-design.md`, "Observed" item
+> 1 and Track P), said no Paddle account had been submitted. **That was never
+> measured.** Each session copied it from the previous document. The owner
+> reports the account was set up around mid-August 2026.
+>
+> Withdrawn with it: "Track 1 — open the Paddle account today", the "3–7
+> business day external clock", and any sequencing that put Paddle work behind
+> account creation. What still stands is everything the account does not
+> change: the licensing engineering is built, and the checkout is not.
 
 This repo is the **company-wide master** for e-commerce, licensing, and the
-website. Plugin and installer changes are **not** made from here — decisions
-are settled here, then issued as HandOff prompts to sessions opened in the
-target repos, and the results are verified back here. See
-`docs/handoffs/SYNC_LEDGER.md` for what has been issued and verified, and
-`docs/handoffs/ORDER_OF_WORK.md` for sequencing.
+website. Plugin and installer changes are **not** made from here. Decisions are
+settled here, issued as HandOff prompts to sessions opened in the target repos,
+then verified back here. See `docs/handoffs/SYNC_LEDGER.md` and
+`docs/handoffs/ORDER_OF_WORK.md`.
 
 Release work lives in `~/XODMK/xodCode/xodCpp/csphxAudioPLUGX/`. The `_PLUGX`
-projects are the final RELEASE masters; they each carry the documentation set
-and the PDF generation script, and the `_INSTALL` projects are responsible for
-generating the PDFs from the master `build_docs.sh`.
+projects are the final RELEASE masters (code and documentation). The `_INSTALL`
+projects package them and generate PDFs. `~/XODMK/xodCode/xodCpp/csphxAudioVST3/`
+holds the `_VST3MSTR` projects: temporary pre-licence stand-ins, **not** masters,
+even though some of their doc files are newer.
 
-`csphxAudioVST3/` holds the `_VST3MSTR` projects. These are **temporary
-pre-license RELEASE masters**, standing in only until licensing is complete —
-which is itself blocked on Paddle and on the domain. They are **not** the
-master. Their doc files are currently *newer* than the `_PLUGX` copies; reading
-"newer" as "authoritative" inverts the intended flow and is the specific
-mistake to avoid.
-
-> Path note: earlier revisions of this file wrote these as
-> `/home/csphx/XODMK/xodCode/...`, which exists on no machine as written. The
-> real prefix is `~/XODMK/xodCode/xodCpp/`. Looking for the literal old path
-> leads to the false conclusion that the trees are absent.
+> Path note: older revisions wrote `/home/csphx/XODMK/xodCode/...`, which exists
+> on no machine. The real prefix is `~/XODMK/xodCode/xodCpp/`.
 
 ---
 
 ## What we know vs. what we're inferring
 
-### Observed (measured 2026-08-28)
+### Observed (measured 2026-09-14 unless stated)
 
-- `chromesphynx.com` is registered, with DNS authoritative at Cloudflare
-  (`leonidas.ns.cloudflare.com` / `martha.ns.cloudflare.com` — Cloudflare's
-  randomly assigned nameserver pair, *not* project-specific names).
-- Cloudflare Email Routing is live at the DNS layer: `MX` →
-  `route{1,2,3}.mx.cloudflare.net`; `TXT` → `v=spf1
-  include:_spf.mx.cloudflare.net ~all`. Source: direct queries against 1.1.1.1.
-- The domain had **no `A`, `AAAA`, or `CNAME`** record on apex or `www`, so it
-  did not resolve at all. That — not a broken deployment — is what produced
-  `DNS_PROBE_POSSIBLE` in the browser.
-- The site itself is healthy: `chrome-sphynx-web.vercel.app` returns 200 on all
-  15 routes; `/api/webhooks/paddle` returns 405 (POST-only, correct); the WIP
-  notice renders and no Paddle checkout script loads — consistent with
-  `PURCHASING_ENABLED = false`.
-- `npm test` → **23/23 pass**, with no secrets configured.
-- The doc toolchain reproduces the shipped PDFs on this machine: pandoc 2.9.2.1,
-  XeTeX 3.141592653, python3 3.10.12, rsvg-convert 2.52.5, inkscape 1.1.2.
-  Rebuilding `Poltergeist_ProductPage.pdf` produced 444,725 bytes against the
-  committed 443,846 — normal PDF nondeterminism, not a content difference.
-- `github.com/xodmk` is a personal **User** account, not an organization. The
-  repo is **public**.
-- `~/.ssh/escheiSSHKey` (RSA 3072) is **not registered** on that account —
-  GitHub returns `Permission denied (publickey)` even when it is offered
-  directly. No git credential helper is configured either.
-- **None of the seven** plugin / installer / `cslicense` repos has a git remote.
-- `_PLUGX` has the three user-facing `.md` but **no `build_docs.sh`, no
-  `docs/gfx/`, no `docs/pdf/`** — it cannot currently build a PDF. The
-  `_INSTALL` projects contain zero references to `build_docs`, `pandoc`, or
-  `.pdf` in any script.
+**Paddle and commerce**
 
-### Observed (measured 2026-09-03)
+| Fact | Source |
+|---|---|
+| A Paddle account exists, set up about mid-August 2026, and is in **sandbox** mode. Its catalog, price ids, client token and notification destinations are **recorded nowhere** on this machine or in this repo. | Owner, 2026-09-14 / 2026-09-15 |
+| Production webhook is **not configured**: an unsigned `POST {}` to `https://chromesphynx.com/api/webhooks/paddle` returns `500 {"error":"not configured"}`. In `route.ts` that response means `PADDLE_WEBHOOK_SECRET_KEY` **or** `CS_LICENSE_PRIVATE_KEY` is missing from the production deployment. The probe cannot tell which. | Live probe; `src/app/api/webhooks/paddle/route.ts:20-25` |
+| No Paddle.js on the live site: neither product page references `cdn.paddle.com`; both show "Not yet on sale". | Live fetch of `/plugins/block-rotator`, `/plugins/poltergeist` |
+| **The checkout has never been written.** `src/app/plugins/[slug]/page.tsx:47` is still `TODO(mor): swap for the Paddle checkout overlay once the account is verified`, and the code under it links to `/support#buying`. `src/` has zero references to `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `NEXT_PUBLIC_PADDLE_ENV`, `Paddle.Initialize` or `cdn.paddle.com`. | grep of `src/` |
+| Variables the code reads: `CS_LICENSE_PRIVATE_KEY`, `CS_LICENSE_EMAIL_FROM`, `CS_SUPPORT_EMAIL`, `CS_PADDLE_PRODUCT_MAP`, `PADDLE_API_KEY`, `PADDLE_API_BASE`, `PADDLE_WEBHOOK_SECRET_KEY`, `RESEND_API_KEY`, `NEXT_PUBLIC_SITE_URL`, `VERCEL_URL`. | `grep process.env src/` |
+| `PURCHASING_ENABLED = false`. | `src/lib/status.ts:8` |
+| **No link between this machine and the Vercel project.** No `.vercel/` directory, no `vercel` CLI installed, no `.env.local`. Only `.env.example` exists, with every Paddle key commented out. No session on this machine can read the Vercel project's settings. | `ls -la`, `which vercel` |
+| **The Paddle Claude Code plugin is installed but not yet connected to the account.** Installed 2026-09-15 05:46 UTC at `de7fcd3`, enabled, 10 `paddle:*` skills loaded. MCP state: `paddle-sandbox` **rejected with HTTP 401** ("Missing or invalid Authorization header"); `paddle-docs` waiting for browser OAuth; `paddle-live` waiting for OAuth (not needed while in sandbox). The owner's sandbox key, tested directly the same day, is **valid**: REST API 200 and `sandbox-mcp.paddle.com/mcp` initialize 200. So the 401 means the plugin never received the key, not that the key is bad. | `installed_plugins.json`; MCP connection report; direct probe 2026-09-15 |
+| **The sandbox account is empty.** Products 0, prices 0, notification destinations 0, client-side tokens 0. Nothing has been configured in it yet. | Read-only `GET` on `/products`, `/prices`, `/notification-settings`, `/client-tokens`, 2026-09-15 |
+| **What the plugin contains** (pinned `PaddleHQ/paddle-agent-skills@de7fcd3`). Three MCP servers: `paddle-docs`; `paddle-sandbox` (`sandbox-mcp.paddle.com`, authenticated by a **sandbox API key `pdl_sdbx_…`** asked for at install); `paddle-live` (browser OAuth, no key). Skills: `catalog-setup`, `checkout-web`, `webhooks`, `sandbox-testing`, `pricing-pages`, `customer-portal`, `billing-history`, `subscription-*`. | `.mcp.json`, `.claude-plugin/plugin.json` in that repo |
 
-Re-measured after a machine crash. Nothing was lost: `ChromeSphynxWeb` has a
-clean working tree, and every `_PLUGX` / `_INSTALL` / `cslicense` repo is
-committed at the same HEAD the ledger records.
+**Site, DNS, repo**
 
-- **The domain now serves.** `chromesphynx.com` resolves to `66.33.60.193` /
-  `76.76.21.241` (Cloudflare CNAME flattening, so the apex answers with `A`
-  records) and returns **200** over HTTPS. Nameservers are unchanged at
-  Cloudflare. The Cloudflare CNAME step described below is **done**.
-- **`www.chromesphynx.com` is broken.** DNS is correct — it answers
-  `cname.vercel-dns.com`, then the same two Vercel addresses — but the
-  certificate Vercel serves carries `CN = chromesphynx.com` with a single SAN,
-  `DNS:chromesphynx.com`. `www` is absent, so HTTPS fails to negotiate
-  (`curl` exit 60). `http://www` still issues a 308 to `https://www`, which
-  then dead-ends. A visitor typing `www.` gets a browser security warning, not
-  the site.
-- **The two newest commits are not on the remote.** `git fetch` confirms
-  `main` is ahead of `origin/main` by `074f32d` (the v1.2 PDF publication) and
-  `f7527ef` (this file). Consequence, measured against the live site: every
-  published PDF path 404s —
-  `/docs/block-rotator/BlockRotator_UserGuide.pdf`,
-  `/docs/poltergeist/Poltergeist_UserGuide.pdf` and the `DOC_VERSION` files all
-  return `404 text/html`.
-- **Push is still unauthenticated.** `origin` is HTTPS, no credential helper is
-  configured, `~/.ssh/config` does not exist, and `~/.ssh/escheiSSHKey` is
-  present but still unregistered. This is the one thing standing between the
-  committed work and the live site.
-- `PURCHASING_ENABLED` is still `false` in `src/lib/status.ts` — unchanged, as
-  intended.
+| Fact | Source |
+|---|---|
+| `https://chromesphynx.com` returns 200. | curl |
+| `https://www.chromesphynx.com` still fails TLS (curl exit 60). Unchanged since 2026-09-03. | curl |
+| Product PDFs are live: `/docs/block-rotator/BlockRotator_UserGuide.pdf` returns `200 application/pdf`. This resolves the 2026-09-03 404. | curl |
+| `main` is **1 commit ahead** of `origin/main` (`bdf0efb`, the 09-10 NEXT_STEP). `docs/PLUGIN_LICENSE_SPEC.md` has uncommitted changes (§5/§9 corrections from 2026-09-11). | `git status -sb`, `git diff --stat` |
+| Website EULA heading still reads `4. Trials` (`src/app/legal/eula/page.tsx:58`). The installer EULA says DEMO. | grep |
+| Git remote is HTTPS with no credential helper, yet `main` was pushed on 2026-09-10. **How that push authenticated is unknown.** | `git remote -v`, `git config` |
 
-### Observed (measured 2026-09-10)
+**Plugins and installers**
 
-A plugin-side session. Nothing about Paddle, DNS, Resend or the checkout moved;
-everything below is the C++ trees and this repo's spec copy.
+| Repo | HEAD | Working tree | Notes |
+|---|---|---|---|
+| `XodBlockRotator_PLUGX` | `1fdc75a` (09-11) | **4 files uncommitted**: `SessionDemo.h`, `PluginProcessor.cpp`, `test_session_demo.cpp`, spec | 09-11 demo-expiry click fix (wet 1→0, then dry 0→1 over 30 ms). Suite was 174/174 on 09-11; **not re-run today** |
+| `XodBlockRotator_INSTALL` | `e1e2fad` (09-11) | **4 files uncommitted**: `EULA.txt`, `README.md`, `prepare-plugin.sh`, `src/App.jsx` | Linux packages built **09-11 17:28**: `.deb` 7,883,386 / `.rpm` 7,883,869 / `.AppImage` 86,731,256. 09-11: `.so` md5 `a9cdee90…` matches between BUILD and `.deb` |
+| *Installed on this machine* | — | — | 2026-09-15 13:00: `~/.vst3/csphx/BlockRotator.vst3`, installed from the **AppImage** (md5 `a15582b4…`, matches the AppImage payload; not registered with dpkg). It differs from BUILD/`.deb` (`a9cdee90…`) **only by an added `RUNPATH $ORIGIN`**: `.text`, `.rodata` and `.data` hash identical; all libraries resolve. A **Poltergeist.vst3 dated 2026-08-31** (pre-regeneration) sits beside it |
+| `XodPoltergeist_PLUGX` | `02d92f0` (09-11) | clean | Regenerated from `xodPoltergeist_ESP`; licensing re-integrated; 1.0.0 |
+| `XodPoltergeist_INSTALL` | `1904679` (09-11) | clean | Linux packages are **0.1.0 from 2026-08-07**. Stale; they predate 1.0.0 |
+| `cslicense` | `057e809` (08-10) | clean | Pinned by both plugins |
 
-**Push is no longer a blocker.** `main` was pushed to `origin/main`
-(`caf4d46..aabb73e`). The four commits that had never left this disk — the
-product PDFs, the doc-publishing commit, the launch spec, and today's spec
-correction — are now on GitHub, so the PDFs deploy and this file is readable
-from another machine. That overturns the 2026-09-03 finding above.
+### Working hypotheses (flagged, not confirmed)
 
-**Executable bits had been stripped from 31 tracked shell scripts** across
-`XodBlockRotator_INSTALL`, `XodPoltergeist_INSTALL` and `XodPoltergeist_PLUGX`
-(mode `100755` → `100644`, zero content change — a copy across a filesystem
-that dropped permissions). No `./build.sh` could run in any of them. Restored;
-the working trees then matched their index again. **It recurred in
-`XodPoltergeist_PLUGX` after that tree was refreshed**, so treat it as a
-symptom of how these trees are copied, not a one-off.
-
-**Block Rotator — licensing UI completed and shipped.** Spec §4 asked for the
-licensee name "in an about box"; there was no about box, and no route to one,
-because `LicensePanel` hid both itself *and* the KEY button once licensed. A
-paying customer had no way to confirm the licence registered. Replaced with an
-18 px key glyph pinned **top-right**, drawn as a `juce::Path` (no image asset),
-present in **every** state including Licensed and hidden only while the panel
-it opens is already up. Opening it while licensed shows a read-only view:
-licensee, email, order id, perpetual-vs-expiry. The unlock form is hidden when
-licensed. Suite went 172/172, determinism gate pass, 10/10 headers standalone.
-Committed as `6197ef8`.
-
-**Block Rotator has been packaged for the first time.** `Linux/` previously
-held only `.gitkeep`. Now carries `.deb` (7,883,016), `.rpm` (7,883,625) and
-`.AppImage` (86,731,256) at v1.0.0. The chain was verified byte-identical at
-every hop — PLUGX `BUILD/` → `prepare-plugin.sh` staged payload → the binary
-extracted back out of the `.deb`, all md5 `895ce3a6a4546672cb529a88808d94ae`,
-the same build the 172 tests ran against. That closes the stale-binary defect
-class for this artefact: the payload now postdates its own `LicensePanel.cpp`.
-
-**Poltergeist had its licensing deliberately removed, and it has been
-re-integrated.** The tree was refreshed from the pre-licence development
-project. Absent from the working tree: all five licensing sources, both
-`Licensing/` directories, every licensing reference in `PluginProcessor` and
-`PluginEditor`, every `cslicense` CMake reference, **and the entire `tests/`
-directory**. A build from that tree was a permanently-free plugin. Licensing
-was rebuilt from Block Rotator as the reference, so the two now share one
-structure (`namespace xodlic`, flat `plugin/include/`, standalone
-`SessionDemo`). Licensing suite: **21/21 green**.
-
-**Two D-L1/D-N1 naming decisions had been reverted by that refresh**, both
-caught by building and testing rather than by reading:
-
-- `PRODUCT_NAME` was back to `xodPoltergeist` (HEAD had `Poltergeist` from
-  `0873501`), so the build emitted `xodPoltergeist.vst3` while the installer
-  expects `Poltergeist.vst3`. Restored.
-- `presets.cpp` wrote user presets to `<Documents>/Chrome Sphynx Audio/Spectral
-  Ghost/` while licences resolve to `…/Poltergeist/` — one product's user data
-  split across two folders, with the DSP codename leaking into a user-facing
-  path. Fixed, **with a one-time migration** (see "Facts worth not
-  rediscovering").
-
-**Poltergeist is now at 1.0.0** in all five places, including
-`plugin/CMakeLists.txt`'s sub-project version — which is the one JUCE reports
-to the host, and the one easiest to miss.
-
-**Spec §4's "UI styling" paragraph was stale** and had been since v3.0. It
-still described `TrialActive`/`TrialExpired`/`Unlicensed` and a day-based trial
-pill, none of which exist. It is the paragraph an implementer reads when wiring
-the licence UI, so it would have misdirected the Poltergeist work in exactly
-the place the two plugins must match. Corrected in this repo's master copy
-(`aabb73e`) and synced to Block Rotator; both copies byte-identical.
-
-### Working hypotheses (flagged — not confirmed)
-
-- The Vercel account slug is **not** `xodmk`. Building a dashboard URL from the
-  GitHub username gave a 404, but Vercel 404s rather than 403s on projects a
-  session cannot see, so that does not distinguish "wrong slug" from "wrong
-  account". Settle it by opening `vercel.com/dashboard` and reading the slug
-  from the address bar.
-- Cloudflare proxying is *expected* to break the Paddle webhook and deploy cache
-  coherence (see the warning below). This is reasoning from how the components
-  work, not an observed failure — no proxied request has been tested.
+- **H1: the missing production variable is `PADDLE_WEBHOOK_SECRET_KEY`.** The
+  09-10 revision recorded `CS_LICENSE_PRIVATE_KEY` as "confirmed live", which
+  would leave the webhook secret as the missing one. That earlier claim is
+  itself unverified from this machine.
+- **H2: the Paddle settings the owner expects in Vercel are missing, or not
+  applied to production.** Possible forms: never added; added to the
+  Preview/Development scope only; or added without a redeploy (env vars apply
+  only to new deployments). All three produce the same 500.
+- **Why no Paddle integration exists yet.** Three causes contributed; each is
+  observed on its own, but how much each one mattered is inference. Ranking
+  them is premature.
+  1. **False premise.** The docs said there was no account, and the plan
+     sequenced the checkout (spec W4) behind account creation (spec Track P,
+     "start first"). The code TODO repeats it: "once the account is verified".
+  2. **No access path.** The checkout needs the `pri_` price ids and a
+     client-side token. Nothing here could fetch them: no Paddle plugin, no
+     Vercel link, no `.env.local`. So no session could build or test the
+     checkout against the real account.
+  3. **Standing pause.** On 2026-09-10 the owner paused launch work until both
+     `_PLUGX` projects are fixed and regenerated, Block Rotator first.
+- Cloudflare's orange-cloud proxy is *expected* to break the webhook and deploy
+  cache (see the warning below). This is reasoning from how the parts work;
+  nothing proxied has been tested.
 
 ### Deferred — and the measurement that resolves each
 
 | Question | What settles it |
 |---|---|
-| Does `chromesphynx.com` serve over TLS? | `curl -sSI https://chromesphynx.com` → 200, once the CNAME is live |
-| Does Paddle's webhook arrive intact? | sandbox `transaction.completed` → expect 200, not 403 |
-| Does a licence email actually arrive? | configure Resend, trigger `/api/account/resend`, check the inbox |
-| Do the plugins behave in a real DAW? | `docs/DAW_VERIFICATION_SCRIPT.md`, once per plugin per format |
-| Does the §4 key icon render where it is supposed to? | Load the Block Rotator `.deb` build in a host. Its position is arithmetic, never observed — 18 px at (694, 8) in a fixed 720×660 editor |
-| **Do the production keypair halves actually match?** | `CS_LICENSE_PRIVATE_KEY=… node scripts/license-cli.ts issue --type full --product block-rotator --out /tmp/t.cslic`, then `verify --file /tmp/t.cslic --pubkey deda76f2…` (spec §7.1). **Never run.** A mismatch fails looking exactly like "my licence doesn't work", after a customer has paid |
-| Does Poltergeist still need its DSP/golden suite, or will the development project supply one? | Ask before rebuilding it; `tests/CMakeLists.txt` currently declares licensing tests only |
-| Does the Poltergeist preset migration behave on a real library? | Only ever run against an empty legacy folder (2026-09-10). Test with actual `.xrp` files present before shipping |
+| Do products and prices exist? What are the `pri_` ids? | Paddle MCP: list products/prices, or the dashboard catalog |
+| Does a client-side token exist? Is a default payment link set? | Dashboard → Developer tools → Authentication; Checkout settings |
+| Does a notification destination target `/api/webhooks/paddle` for `transaction.completed`? | Paddle MCP: list notification settings |
+| Which variables are set in Vercel, and in which scope? | `vercel link` then `vercel env ls` (see step 0) |
+| Is H1 right? | `vercel env ls production`; after fixing, the unsigned probe should return **403**, not 500 |
+| Do the production keypair halves match? | Spec §7.1: `issue` with the private key, then `verify --pubkey deda76f2…`. **Never run** |
+| Does a licence email arrive? | Configure Resend, run a sandbox purchase, check the inbox |
+| Does `custom_data.email` arrive on the webhook (spec H3)? | Inspect the sandbox `transaction.completed` body |
+| Does Block Rotator behave in a DAW (key icon at 694,8; demo-expiry click)? | `docs/DAW_VERIFICATION_SCRIPT.md` in Bitwig against the 09-11 17:28 `.deb` |
+| Poltergeist preset migration with a real library | Run with actual `.xrp` files in the legacy folder |
+| Does Poltergeist need its DSP/golden suite restored? | Owner decision; `tests/CMakeLists.txt` declares licensing tests only |
+| How did the 09-10 push authenticate? | Check with the owner; matters before pushing from another machine |
 
 ---
 
 ## Where things stand
 
-**Everything structural is finished.** The engineering that stood between you
-and selling is done and verified. What is left is account setup, release
-builds, and one round of human testing.
+### Paddle integration: what is built, what is not
 
-### Website — built, live, purchasing deliberately disabled
+| Piece | State |
+|---|---|
+| Paddle account | **Exists, sandbox mode** (owner). Catalog unrecorded |
+| Webhook receiver (raw-body HMAC, 403 on bad signature) | Built and unit-tested (`src/lib/licensing/paddle.ts`, `tests/paddle.test.ts`) |
+| Licence issuing (Ed25519 `.cslic`, stateless, no DB) | Built |
+| Lost-licence re-send via the Paddle API | Built (`src/app/api/account/resend/route.ts`, `src/lib/licensing/paddle-api.ts`) |
+| Plugin-side verifier (`cslicense`) | Built, pinned in both plugins |
+| **Checkout overlay (Paddle.js)** | **Not written.** The only new code the launch needs (spec W4) |
+| Production env (`PADDLE_*`, `CS_PADDLE_PRODUCT_MAP`, client token) | **Not effective in production** (500 probe) |
+| Catalog / price ids / notification destination | Unknown |
+| Resend | `RESEND_API_KEY` unset as of 09-10; not re-measured |
+| Sandbox end-to-end purchase | Never run |
 
-Fifteen routes: home, two product pages, `/trial`, `/account`, `/support`,
-four legal pages, and two API routes. Prices are $79 each. The legal pages
-carry your real trading identity (Elliot Schei, Suginami-ku Takaido Higashi
-3-16-33, Tokyo 168-0072), which was the last blocker on merchant-of-record
-submission.
+Paddle Billing has **no checkout that works without JavaScript**: the default
+payment link must be a page on an approved domain that loads Paddle.js. The
+overlay is required, not a style choice (spec D1).
 
-Purchasing is gated behind a single switch: `PURCHASING_ENABLED` in
-`src/lib/status.ts`. Every buy button shows an amber "Work in progress — not
-yet on sale" notice and an inert control. **Flipping that one constant is the
-entire go-live action** for the site.
+### Website: live, purchasing deliberately off
 
-### Domain and DNS — apex live, `www` still broken
+Fifteen routes. $79 per plugin. The legal pages carry the real trading
+identity. Every buy button reads `PURCHASING_ENABLED` in `src/lib/status.ts`.
+Flipping it goes live **only after** the checkout exists; flipping it today
+would show a "Buy" button that links to `/support#buying`.
 
-> **Status 2026-09-03:** both steps below were completed for the apex and it
-> now serves. `www` was given its Cloudflare CNAME but never added in Vercel,
-> so Vercel's certificate does not cover it and HTTPS on `www` fails. Repeat
-> step 1 for `www.chromesphynx.com`. Everything else in this section is
-> retained because the two warnings still apply.
+### Licensing
 
-The site was only ever reachable at `chrome-sphynx-web.vercel.app`; the domain
-resolved to nothing. Activation is two steps in two dashboards, and Cloudflare
-stays authoritative throughout:
+Ed25519-signed `.cslic` licences that the plugin verifies **offline, forever**.
+No database: licences are derived from the order, so duplicates re-send an
+identical file and lost licences are regenerated from Paddle's records. The
+public key, compiled into both plugins:
+`deda76f2f48f57795d1f7cc25e283d8811c6c492efb00bcaa936582586964275`. The
+private half lives only in Vercel and the owner's password manager. **Losing it
+invalidates every licence ever issued.**
 
-1. **Vercel** → project → Settings → Domains → add `chromesphynx.com`.
-2. **Cloudflare** → DNS → add:
-
-   | Type | Name | Target | Proxy |
-   |---|---|---|---|
-   | CNAME | `@` | `cname.vercel-dns.com` | **DNS only** (grey) |
-   | CNAME | `www` | `cname.vercel-dns.com` | **DNS only** (grey) |
-
-A CNAME at the apex is normally illegal; Cloudflare's CNAME flattening makes it
-work. Use the CNAME rather than an A record — Vercel assigns addresses per
-project and has changed them (`vercel.com` → `64.239.109.65`, `nextjs.org` →
-`216.230.86.1`), so a hardcoded IP goes stale. `cname.vercel-dns.com` tracks the
-right target automatically.
-
-> ### ⚠️ Two settings that will quietly break this
->
-> **Do not delegate DNS to Vercel's nameservers.** When Vercel offers to manage
-> DNS, decline and keep Cloudflare. Cloudflare Email Routing only works while
-> Cloudflare is authoritative — delegating would kill
-> `support@chromesphynx.com` permanently (it cannot be recreated on Vercel DNS)
-> and drop the SPF record that licence email will depend on.
->
-> **Do not enable Cloudflare's proxy (orange cloud).** Cloudflare's "proxying is
-> required for most security features" banner is generic advice for unprotected
-> origins; Vercel already provides CDN, TLS, and DDoS mitigation. Proxying adds
-> three specific hazards:
-> 1. **It breaks the deploy loop.** Cloudflare caches in front of Vercel and
->    Vercel cannot purge it, so a successful deploy keeps serving the old site
->    until the TTL expires — with no error anywhere.
-> 2. **It endangers the Paddle webhook.** Bot Fight Mode and WAF rules are
->    designed to challenge automated POSTs to API paths. Paddle would get a
->    challenge or 403 instead of reaching the route; the signature check in
->    `src/lib/licensing/paddle.ts` is HMAC over the *raw* body, so anything that
->    alters or blocks the request yields 403 and endless retries while the
->    customer receives nothing.
-> 3. **It can stall TLS issuance**, producing certificate errors that look like
->    an unrelated fault.
->
-> If Cloudflare's WAF is wanted later, enable it only *after* a sandbox purchase
-> has succeeded, and add a cache-bypass rule for `/api/*` plus a WAF skip for
-> `/api/webhooks/*`. Then re-test the purchase.
-
-### Product documentation — published in this repo
-
-The finalized **v1.2** documents for both plugins now ship from this repo:
-
-- `public/docs/<plugin>/*.pdf` — intended to be served by Vercel at
-  `/docs/block-rotator/BlockRotator_UserGuide.pdf` and equivalents. **They are
-  not live yet:** as of 2026-09-03 every one of those paths returns 404,
-  because the commit that adds them has never been pushed. An earlier revision
-  of this file claimed they were verified at 200 as `application/pdf`; that was
-  measured locally, not against the deployed site. Pushing resolves it.
-- `docs/product/<plugin>/*.md` — the same content in source form, so site
-  development can read product wording without opening a PDF.
-- `public/docs/<plugin>/DOC_VERSION` — the version the PDFs were built from,
-  matching the `<!-- doc-version: X.Y -->` comment on line 1 of each `.md`.
-
-**These are snapshots, not masters.** `_PLUGX` remains the release master for
-the documents and `_INSTALL` generates PDFs for local builds; this repo carries
-the published copy so the website can link downloads and so site development can
-read the content. See `docs/product/README.md`. When updating a snapshot,
-replace the PDFs, the `.md`, and `DOC_VERSION` together so they never disagree.
-
-They were taken from `_VST3MSTR` because that tree holds the only built PDFs —
-`_PLUGX` has no `pdf/` at all. That is a gap in `_PLUGX`, not a change of
-master.
-
-### Licensing — stateless, no database
-
-Ed25519-signed `.cslic` licences the plugin verifies **offline, forever**, with
-no runtime dependency on us or on Paddle. There is no database and none is
-needed: licences are derived deterministically from the order, so a duplicate
-webhook re-sends the identical file and a lost licence is regenerated by asking
-Paddle what the customer bought.
-
-The production key is generated and registered. Public half:
-`deda76f2f48f57795d1f7cc25e283d8811c6c492efb00bcaa936582586964275`. The private
-half lives only in Vercel (`CS_LICENSE_PRIVATE_KEY`, confirmed live) and your
-password manager — **losing it invalidates every licence ever issued.**
-
-### Plugins — both at spec v3.0 (table refreshed 2026-09-10)
+### Plugins
 
 | | Block Rotator | Poltergeist |
 |---|---|---|
-| Tests | **172/172**, zero failures; determinism gate pass | **21/21 licensing** — see the caveat below |
-| Production key | in | in (identical constant, verified against BR's) |
-| `PRODUCT_NAME` | `BlockRotator` | `Poltergeist` (reverted by the refresh, restored) |
-| Version | 1.0.0 | 1.0.0 (was 0.1.0) |
-| Session demo | yes, standalone `SessionDemo` | yes, same class after re-integration |
-| Key icon (§4) | yes, top-right, all states | yes, ported |
+| State | Licensing and demo complete **pending** a production-key licence and a DAW pass; 09-11 fix uncommitted | Regenerated and committed 09-11; waiting to receive the verified Block Rotator result |
+| Tests | 174/174 (09-11) | 21/21 licensing only; DSP/golden suite absent |
+| Version | 1.0.0 | 1.0.0 |
 | `kBuyUrl` | `/plugins/block-rotator` | `/plugins/poltergeist` |
-| Linux package | **built** — deb/rpm/AppImage | not built |
-| `cslicense` pin | `7ba45b1` | `73e2246` (verified at `057e809`) |
+| Linux package | Built 09-11 17:28 | **Stale** (0.1.0, 08-07) |
+| macOS package | Not built; Mac only | Not built; Mac only |
 
-> **Poltergeist's DSP/golden suite is missing, not passing.** The 247/256 figure
-> in earlier revisions of this file described a tree that no longer exists — the
-> refresh removed `tests/` entirely. What was rebuilt is a licensing-only
-> `tests/CMakeLists.txt`; the DSP, algorithm and golden tests are **absent** and
-> were deliberately not re-declared, on the assumption the development project
-> supplies its own. Do not read 21/21 as equivalent to Block Rotator's 172/172.
-> Restoring that suite is an open item.
+Unlicensed: a fully functional 20-minute session demo with preset saving
+disabled. Licensed: no licensing work at all on the audio thread.
 
-Unlicensed plugins run a **fully functional 20-minute session demo with preset
-saving disabled**. A licensed plugin does **no licensing work at all** —
-`prepareToPlay` returns immediately and nothing touches disk. The audio-thread
-cost is one relaxed atomic load; demo mode adds one 64-bit subtract and compare
-(measured 0.62–0.73 ns/block). The VST3 class ID was **unchanged** by the
-rename, so no saved sessions are at risk.
+### Domain and DNS: apex live, `www` broken
 
-### Installers and shared module
+Fix `www` in **Vercel** → project → Settings → Domains → add
+`www.chromesphynx.com`, redirecting to the apex. The Cloudflare CNAME already
+exists; Vercel won't issue a certificate for a hostname it hasn't been told
+about. Do **not** fix it by deleting the `www` record.
 
-Both installers describe the demo correctly and carry a matching DEMO clause in
-their EULA. They remain licence-agnostic — they install binaries and point at
-`chromesphynx.com/account`. `cslicense` is at `057e809` and is now **pinned** in
-both plugins: if the module moves, configure fails with a message naming both
-SHAs instead of a mystery compile error.
+> ### ⚠️ Two settings that will quietly break this
+>
+> **Do not delegate DNS to Vercel's nameservers.** Cloudflare Email Routing
+> (`support@chromesphynx.com`) and the existing SPF record only work while
+> Cloudflare is authoritative.
+>
+> **Do not enable Cloudflare's proxy (orange cloud).** It (1) caches in front of
+> Vercel, so deploys keep serving the old site; (2) exposes the webhook to Bot
+> Fight Mode / WAF challenges, and the HMAC check is over the raw body, so the
+> result is 403 plus endless Paddle retries while the customer gets nothing;
+> (3) can stall TLS issuance. If the WAF is wanted later: only after a sandbox
+> purchase has succeeded, with a cache bypass for `/api/*` and a WAF skip for
+> `/api/webhooks/*`.
+
+> **Email is a launch blocker.** Without `RESEND_API_KEY` a real purchase
+> creates a correct licence, fails to email it, returns 500, and Paddle retries
+> forever. When configuring Resend, **merge its SPF `include:` into the existing
+> TXT record**. Two SPF records send mail to spam.
 
 ---
 
 ## What is NOT done
 
-1. **No Paddle account exists.** Nothing has been submitted. This is the only
-   item with an external clock — 3–7 business days.
-2. **No human has opened either plugin in a DAW.** Every state is verified by
-   unit test and disassembly; none has been *seen*. Script ready at
-   `docs/DAW_VERIFICATION_SCRIPT.md`.
-3. ~~**No release builds exist.**~~ **Partly done (2026-09-10).** Block Rotator
-   now has Linux `.deb`, `.rpm` and `.AppImage` at v1.0.0, carrying a payload
-   verified byte-identical to the tested build. Still missing: **Poltergeist's
-   Linux package** (the plugin builds and its licensing passes, but
-   `prepare-plugin.sh` and `build.sh` have not been run in its `_INSTALL`
-   tree), and **every macOS artefact** for both plugins — signed and notarised
-   `.pkg` can only be produced on the Mac, with the Developer ID certs.
-4. **Email sending is not configured.** `RESEND_API_KEY` is unset. See the
-   warning below — this one bites silently.
-5. ~~**Domain not yet serving.**~~ **Done, apex only (2026-09-03).**
-   `chromesphynx.com` resolves and returns 200; `support@chromesphynx.com`
-   routing was already complete. What remains is `www`: add
-   `www.chromesphynx.com` in **Vercel** → Settings → Domains (redirect to the
-   apex). The Cloudflare `www` CNAME already exists, but Vercel will not issue
-   a certificate for a hostname it has not been told about, so `www` currently
-   fails TLS outright. Do **not** fix this by removing the `www` record — that
-   trades a warning for a dead name.
-6. **Nothing outside this repo can reach another machine.** All seven plugin,
-   installer, and `cslicense` repos are git repos with **no remote configured**.
-   Only `ChromeSphynxWeb` is on GitHub. Documentation now transfers because it
-   is published here; plugin *source* still moves only by hand.
-7. ~~**The published PDFs are committed but not deployed.**~~ **Done
-   (2026-09-10).** `main` was pushed (`caf4d46..aabb73e`) and is level with
-   `origin/main`. The eight product PDFs are on GitHub and deploy with the
-   site. Note this made them world-readable — intended, but now actually true.
-   **The plugin trees still have no remotes**, so the C++ source — including
-   today's licensing work — exists on one disk only.
-8. **`_PLUGX` cannot build its own documentation.** It holds stale copies of the
-   three user-facing `.md` and has no `build_docs.sh`, no `docs/gfx/`, and no
-   `docs/pdf/`. The `_INSTALL` projects reference PDF generation nowhere. The
-   arrangement described at the top of this file is the intended target, not the
-   current state.
-
-> **Email is a launch blocker, not a nicety.** Without `RESEND_API_KEY`, a real
-> purchase generates a correct licence, fails to email it, and returns 500 — so
-> Paddle retries indefinitely while the customer receives nothing. Set it up
-> before the first live sale. When you do, **merge Resend's SPF `include:` into
-> the existing record** rather than adding a second TXT record; Cloudflare Email
-> Routing already created one, and two SPF records will send mail to spam.
+1. **Checkout overlay not written** (`page.tsx:47`).
+2. **Production Paddle configuration not effective**: webhook returns
+   `not configured`.
+3. **No tooling connection to Paddle or Vercel from Claude Code**: Paddle
+   plugin not installed, Vercel project not linked.
+4. **Paddle account state not recorded**: live approval, catalog, `pri_` ids,
+   client token, notification destination.
+5. **Block Rotator not signed off**: production-key licence not issued, DAW pass
+   not run, 09-11 fixes uncommitted in PLUGX and INSTALL.
+6. **Poltergeist Linux package stale** (0.1.0); preset migration untested on
+   real files; DSP suite decision open.
+7. **No macOS artefacts** for either plugin (Mac, Developer ID, notarisation).
+8. **Resend not configured** (as of 09-10).
+9. **`www` TLS broken.**
+10. **Website EULA still says "4. Trials".**
+11. **`bdf0efb` and the spec correction not pushed.**
+12. **Plugin repos have no git remote.** The C++ source exists on one disk only.
 
 ---
 
 ## The next step
 
-> **Picking this up after 2026-09-10.** Track 2 below is now cheap to start:
-> Block Rotator has an installable `.deb`/`.rpm`/`.AppImage`, so the DAW pass no
-> longer needs a build first. It is also the single highest-value open item,
-> because the key icon added on 2026-09-10 has **never been seen rendered** —
-> its placement is arithmetic (18 px at 694,8 in a 720×660 editor whose top
-> strip centres its controls at x≈113–607), not observation.
->
-> Two smaller things are queued behind it, both plugin-side and both recorded
-> in "Observed (measured 2026-09-10)": package Poltergeist for Linux, and
-> decide whether to restore Poltergeist's DSP/golden test suite. Neither blocks
-> Track 1.
->
-> Nothing in the Poltergeist tree is committed yet.
+**The single next action:** the owner types the two `/plugin` commands in
+step 1. Everything after it depends on Claude being able to reach the Paddle
+sandbox.
 
-**Two tracks. Start both now — neither blocks the other.**
+### How the pieces talk to each other
 
-### Track 1 — Open the Paddle account today
+There are three channels. Two are not set up yet, and that gap is why no
+Paddle integration exists.
 
-It is pure waiting time, and it is the only thing you cannot compress. Sign up
-at paddle.com, then work through verification in the dashboard at
-vendors.paddle.com. Three phases: **domain review** (submit
-`chromesphynx.com`), **business verification** — skip it, explicitly not
-required for sole traders — and **identity verification** (government ID plus
-proof of address, via Sumsub).
+| Channel | Connects | Carries | State |
+|---|---|---|---|
+| **Paddle Claude Code plugin** | A Claude session in this repo ↔ the Paddle sandbox account | Paddle docs lookup; Paddle API calls (catalog, prices, notification destinations, transactions). Exact tool list unknown until installed | **Not installed** |
+| **Vercel CLI** | This repo ↔ the Vercel project | Env var list and scope, `.env.local`, deploys | **Not installed or linked** |
+| **HandOff prompts** (`docs/handoffs/`) | This repo (master) → Claude sessions opened in the plugin/installer repos | A written task one way; a report back into `SYNC_LEDGER.md` | **Working**: HANDOFF-01…07 |
 
-Have ready: ID, proof of address at the Tokyo address, bank details for
-payouts. The site already satisfies their published checklist: product
-descriptions, pricing, features, and Terms / Refund / Privacy reachable from
-site navigation.
+HandOffs carry work between Claude sessions in **different repos**. They do not
+reach Paddle. The Paddle work is all website-side, in this repo, so it needs no
+HandOff; it needs the plugin. The plugin repos already have everything Paddle
+requires of them (the public key and `kBuyUrl`). They re-enter only at the end,
+when a sandbox-issued licence is pasted into a real build, and that step **is**
+a HandOff.
 
-Decide before submitting whether the "work in progress" notice stays up. It
-should not block review, but a reviewer may ask.
+### The sequence (sandbox throughout; live approval only at the end)
 
-### Track 2 — Run the DAW verification script
+| # | Who | What | Done when |
+|---|---|---|---|
+| 1 | ✔ **DONE 2026-09-15.** `paddle-sandbox-key` (user-scope MCP server, added with `claude mcp add`) connects. Read-only calls through it: products 0, prices 0, notification destinations 0 (the API's `estimatedTotal` said 1–2, but the dashboard confirms "No notification destinations yet", 2026-09-15). Catalog and webhook draft: `docs/paddle/SANDBOX_CATALOG_DRAFT.md`, awaiting approval. The key pasted into chat now gets 403 on `/products`, so it no longer works. History of this step: marketplace added and plugin installed 2026-09-15. **`/plugin install` never asks for the key** (seen twice, including after an uninstall/reinstall), and Claude Code's docs don't describe how to set it. Workaround: register the sandbox server yourself in a normal terminal, outside Claude Code: `read -rs K; claude mcp add --transport http --scope user paddle-sandbox-key https://sandbox-mcp.paddle.com/mcp --header "Authorization: Bearer $K"; unset K`, then restart Claude Code. Use a **new** key: the first one was pasted into chat | A read-only product listing through that server succeeds |
+| 2 | Claude | Call the `paddle-sandbox` MCP server | A read-only call (list products) succeeds |
+| 3 | Claude | Inventory the sandbox: products, `pri_` prices, client-side token, default payment link, notification destinations. Propose anything missing (two $79 products; destination → `https://chromesphynx.com/api/webhooks/paddle` for `transaction.completed`); create them only after the owner approves. Record the **ids** here (never secrets) | Ids recorded in this file |
+| 4 | Owner + Claude | `npm i -g vercel`, `vercel login`, `vercel link`, `vercel env ls`. Set the sandbox values from spec W3: `CS_LICENSE_PRIVATE_KEY`, `PADDLE_WEBHOOK_SECRET_KEY`, `PADDLE_API_KEY`, `PADDLE_API_BASE=https://sandbox-api.paddle.com`, `CS_PADDLE_PRODUCT_MAP`, `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN`, `NEXT_PUBLIC_PADDLE_ENV=sandbox`. Redeploy | Unsigned webhook probe returns **403** instead of 500 |
+| 5 | Claude | Write the checkout (spec W4): Paddle.js, `Paddle.Initialize`, `Paddle.Checkout.open()` with the `pri_` id, behind `PURCHASING_ENABLED` | `npm test` green; overlay opens on a Preview deploy with the gate on |
+| 6 | Owner + Claude | Resend: API key, domain auth, SPF merged into the existing record | A test email arrives |
+| 7 | **Owner** | Sandbox purchase with a Paddle test card | Webhook 200; licence email arrives |
+| 8 | HandOff → Block Rotator session; **Owner** in Bitwig | Paste the sandbox-issued licence into the 09-11 `.deb` build; run `docs/DAW_VERIFICATION_SCRIPT.md` | Plugin unlocks. Because the sandbox signs with the **production** key (spec D3), this also settles the §7.1 keypair question |
+| 9 | Owner + Claude | Commit Block Rotator; Poltergeist packaging via HandOff; macOS builds on the Mac; fix `www` and the EULA heading | Release artefacts exist |
+| 10 | **Owner** | Request live approval; switch to live keys and `PADDLE_API_BASE`; redeploy; flip `PURCHASING_ENABLED` | First live sale |
 
-`docs/DAW_VERIFICATION_SCRIPT.md`, once per plugin per format. It is the
-largest untested surface left, and it targets precisely what tests cannot see:
-a panel rendering off-screen, a countdown reading negative, a modal that traps
-the user, and — the single most important check — **a click at the demo expiry
-boundary**. The script solves both setup problems (issuing a real licence, and
-not waiting 20 minutes per expiry test).
-
-Report failures back here; they become the next handoff rather than direct
-edits, which is what keeps the repos from drifting.
-
-### Then, in order
-
-1. Fix anything the DAW pass finds.
-2. Configure Resend and verify a licence email actually arrives.
-3. Cut release builds — signed and notarised on macOS, packaged on Linux.
-4. Create the Paddle catalog; set `PADDLE_WEBHOOK_SECRET_KEY`, `PADDLE_API_KEY`,
-   and `CS_PADDLE_PRODUCT_MAP`; point a notification destination at
-   `/api/webhooks/paddle` for `transaction.completed`.
-5. End-to-end sandbox purchase: checkout → webhook → licence email → paste into
-   the plugin → unlocked.
-6. Publish downloads on the product pages. The PDFs are already in the repo and
-   will be served once the pending commits are pushed — this is now only a link from
-   `src/app/plugins/[slug]/page.tsx` to `/docs/<plugin>/<file>.pdf`.
-7. Flip `PURCHASING_ENABLED` to `true`.
+**Standing constraint:** on 2026-09-10 the owner paused launch development until
+both `_PLUGX` projects are fixed and regenerated. Steps 1–7 touch only this
+repo and the external services. Whether they run during the pause is the
+owner's decision. As of 2026-09-15 it has not been made.
 
 ---
 
 ## Working across machines
 
-**Vercel and Cloudflare changes are not files.** DNS records live on
-Cloudflare's servers and domain settings and environment variables live on
-Vercel's; both are already visible from any machine you log into. There is
-nothing to commit or sync for either. Only repository files travel through git.
+**Vercel and Cloudflare settings are not files.** They live on those services
+and are visible from any logged-in machine. Only repository files travel
+through git. `vercel env pull` is how secrets reach a second machine.
 
-Before the first push from a new machine, authentication has to exist — neither
-path currently works on the Linux box:
-
-- The remote is HTTPS with **no credential helper**, and GitHub rejects account
-  passwords; a Personal Access Token is required.
-- `~/.ssh/escheiSSHKey` is **not registered** on the `xodmk` account.
-
-To use SSH, register `~/.ssh/escheiSSHKey.pub` at `github.com/settings/keys`,
-then point the remote at it and pin the identity (the key has a non-standard
-filename, so SSH will not offer it automatically):
+On a receiving machine:
 
 ```
-git remote set-url origin git@github.com:xodmk/ChromeSphynxWeb.git
-printf 'Host github.com\n  IdentityFile ~/.ssh/escheiSSHKey\n  IdentitiesOnly yes\n' >> ~/.ssh/config
-```
-
-On the receiving machine:
-
-```
-git clone git@github.com:xodmk/ChromeSphynxWeb.git
+git clone https://github.com/xodmk/ChromeSphynxWeb.git
 cd ChromeSphynxWeb && npm install
-vercel link && vercel env pull .env.local   # secrets, for local licence signing
+vercel link && vercel env pull .env.local
 ```
 
-`.env.local` is gitignored deliberately. Secrets come from Vercel, never from
-git — `vercel env pull` is the whole distribution mechanism, and it is how
-`CS_LICENSE_PRIVATE_KEY` reaches a second machine without ever entering the
-repository.
+The plugin trees have no remotes. Move them with `rsync` or `git bundle`
+(spec D4).
 
 ---
 
 ## Facts worth not rediscovering
 
-- **Commits must be pushed.** Vercel deploys from the GitHub remote; committing
-  locally changes nothing that anyone can see.
-- **Vercel env vars only apply to new deployments.** After adding one, redeploy.
-- **The Vercel dashboard slug is not the GitHub username.** Hand-building
-  `vercel.com/xodmk/...` returns 404. Open `vercel.com/dashboard` and click
-  through; Vercel 404s rather than 403s on anything your session cannot see, so
-  a 404 never tells you whether it is the wrong slug or the wrong account.
-- **Cloudflare's nameserver names are random first names** — `leonidas`,
-  `martha`. They carry no meaning and nothing about them needs configuring;
-  seeing them only confirms the domain's DNS is hosted at Cloudflare.
-- **Whoever holds the nameservers owns every record on the domain** — web,
-  email, and verification tokens alike. Cloudflare already holds working email
-  records, so Cloudflare keeps the nameservers and Vercel gets pointed to.
-- **This repo is public.** Anything committed to `public/` is world-readable the
-  moment it is pushed, the product PDFs included.
+- **Do not take a document's claim about an external account as measured.**
+  "No Paddle account exists" survived five revisions because each session
+  copied it. Account and dashboard state comes from the owner, the dashboard,
+  or the Paddle MCP, with the date it was checked.
+- **`/plugin` commands are typed by the owner.** A session can only give the
+  command. After installing, confirm in `~/.claude/plugins/installed_plugins.json`.
+- **An unsigned POST to the webhook is a safe configuration probe.** 500
+  `not configured` means a required secret is missing; 403 `invalid signature`
+  means both are present. It creates nothing and sends nothing.
+- **Commits must be pushed.** Vercel deploys from GitHub.
+- **Vercel env vars only apply to new deployments.** Redeploy after adding one,
+  and check the scope (Production vs Preview).
+- **The Vercel dashboard slug is not the GitHub username.** Vercel 404s rather
+  than 403s on anything the session cannot see.
+- **This repo is public.** Anything in `public/` is world-readable once pushed.
 - **Adopting a newer `cslicense` means bumping `CSLICENSE_EXPECTED_SHA`** in the
-  same commit that adapts the plugin to it. The pin exists because the module
-  silently broke both plugins once.
-- **The licensing gate is not where CPU goes.** It measured 0.20 ns/block —
-  roughly 1/300th of the unused `AudioProcessLoadMeasurer` that was removed from
-  Block Rotator alongside it.
+  same commit.
 - **`getStateInformation` must never be blocked** by the demo. It is host
-  session state, not preset saving; blocking it reads as data loss.
-- **A tree refresh from the development project silently removes licensing.**
-  It happened to Poltergeist on 2026-09-10: five sources, both `Licensing/`
-  dirs, all `cslicense` CMake wiring, every reference in the processor and
-  editor, and the whole `tests/` directory — leaving a build that is a
-  permanently-free plugin with no gate and no demo. It also reverted two
-  committed naming decisions (`PRODUCT_NAME`, and the preset directory). After
-  ANY such refresh, verify: `grep -rn cslicense CMakeLists.txt
-  plugin/CMakeLists.txt`, that `plugin/include/LicenseConfig.h` exists, and
-  that the build emits the bundle name `plugin.config.sh` expects.
-- **Poltergeist's preset directory moved, with a one-time migration.** Presets
-  used to live at `<Documents>/Chrome Sphynx Audio/Spectral Ghost/`; D-L1 makes
-  that a DSP-core codename that must not appear in a user-facing path, and
-  licences always resolved to `…/Poltergeist/`. `PresetManager` now migrates on
-  first run — **rename only, never merge, never delete**, and only when the new
-  folder does not already exist. A failed migration leaves the old folder
-  untouched and creates an empty new tree, so presets are always recoverable by
-  hand. Verified live on 2026-09-10: the legacy folder moved and the
-  neighbouring `Block Rotator/` library (45 files) was untouched.
-- **Spec §7.2 Vector A is a *block-rotator* trial and Vector B is a
-  *poltergeist* full licence.** They are not interchangeable: each is the wrong
-  product for the other plugin's build and must be rejected at §2 step 4. A
-  test ported between the two plugins without swapping vectors will either fail
-  or pass vacuously.
-- **`juce_add_plugin` reports the SUB-project version**, the one in
-  `plugin/CMakeLists.txt`, not the root `project()` version. Bumping only the
-  root leaves the host showing the old number.
-- **Executable bits do not survive however these trees are being copied.** Seen
-  twice on 2026-09-10, on 31 scripts and then again after a refresh. If
-  `./build.sh` reports "Permission denied", it is this, and `git diff` will
-  show mode-only changes with zero content diff.
-- Legal drafts follow Paddle's requirements and standard practice for
-  downloadable software, but they have not been reviewed by a lawyer.
+  session state, not preset saving.
+- **A tree refresh from the development project silently removes licensing**
+  and reverts naming decisions. It happened to Poltergeist on 2026-09-10.
+  Refreshes also revert installer copy (EULA, `App.jsx`), not just plugin code.
+  After any refresh, check:
+  - `grep -rn cslicense CMakeLists.txt plugin/CMakeLists.txt`
+  - `plugin/include/LicenseConfig.h` exists
+  - the bundle name matches `plugin.config.sh`
+- **Executable bits do not survive however these trees are copied.**
+  "Permission denied" on `./build.sh` plus mode-only `git diff` means this.
+- **Poltergeist presets moved** from `…/Spectral Ghost/` to `…/Poltergeist/`,
+  with a one-time rename-only migration.
+- **Spec §7.2 Vector A is a block-rotator trial; Vector B is a poltergeist full
+  licence.** They are not interchangeable between the plugins' tests.
+- **`juce_add_plugin` reports the sub-project version** in
+  `plugin/CMakeLists.txt`, not the root `project()` version.
+- **Block Rotator test results land in `utest_results/raw_output.txt`**
+  (ANSI-coded), not in `./build_utest.sh`'s stdout.
+- Legal drafts follow Paddle's requirements but have not been reviewed by a
+  lawyer.
