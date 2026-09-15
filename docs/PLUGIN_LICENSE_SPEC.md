@@ -240,32 +240,40 @@ Evaluation produces a latched `std::atomic<bool> processingAllowed` plus a
 plain `bool settled`. `settled` is true when the outcome can never change on
 its own — that is, when a valid `full` licence was found. From then on:
 
-| | Licensed (settled) | Trial active | Expired / unlicensed |
-|---|---|---|---|
-| `processBlock` | 1 relaxed atomic load | 1 relaxed atomic load | 1 relaxed atomic load |
-| `prepareToPlay` | **nothing — immediate return** | one integer comparison | one integer comparison |
-| Disk / crypto | never again | never (values cached in memory) | never |
+(Corrected 2026-09-11 for v3.0: this section still described the removed
+calendar trial — a `cachedTrialStart >= 20 days` check in `prepareToPlay` and
+expiry enforced only at the next `prepareToPlay`. Both contradicted §9.)
 
-### `prepareToPlay` — the only permitted periodic check
+| | Licensed (settled) | `DemoActive` | `DemoExpired` |
+|---|---|---|---|
+| `processBlock` | 1 relaxed atomic load | 1 relaxed atomic load + one 64-bit subtract and compare (§9) | 1 relaxed atomic load, then the early return (plus the one-time ~30 ms dry fade-in, §9) |
+| `prepareToPlay` | **nothing — immediate return** | re-derive the §9 budget from the sample rate | same call; the budget stays at zero |
+| Disk / crypto | never again | never | never |
+
+### `prepareToPlay` — the only permitted periodic work
 
 ```
 if (settled) return;                 // licensed: zero work, forever
-if (now - cachedTrialStart >= 20 days) processingAllowed = false;
+demo.prepare(sampleRate);            // unlicensed: re-derive the §9 budget
 ```
 
-Two integers and a comparison, against values already resident in memory from
-construction. No file is opened, no signature is checked, and nothing is
-written. This is what lets a running trial notice its own expiry without
-polling anything.
+A multiply against values already in memory. No file is opened, no signature
+is checked, nothing is written, and no clock is read. The demo does **not**
+detect its own expiry here — the §9 sample counter in `processBlock` does.
 
 ### The gate is latched during playback
 
-`processingAllowed` never flips between `processBlock` calls in a continuous
-stream — it changes only at `prepareToPlay` or on a user-initiated unlock, so
-no ramp or crossfade is needed (§4). Crossing the expiry boundary mid-session
-updates only the GUI, from cached values; audio enforcement lands at the next
-`prepareToPlay`. The single permitted mid-session change is the user pasting a
-licence, where a one-time transition is accepted.
+`processingAllowed` flips at most twice in an instance's life, and never
+between blocks for any other reason:
+
+1. **The user installs a licence** (message thread) — the one-time transition
+   to `Licensed`, accepted without a ramp.
+2. **The §9 demo budget runs out** (audio thread) — the only write to the gate
+   from `processBlock`, made once, after the §9 fade-out ramp has completed
+   (the dry fade-in then runs on the closed-gate path).
+
+Everything else — sample-rate and buffer-size changes, transport starts,
+editor open/close — leaves the gate untouched.
 
 ### Why the atomic load cannot be zero
 
@@ -411,9 +419,17 @@ it needs a ramp — the one place §4's "no ramps" rule is deliberately relaxed:
    48 kHz), applied once.
 3. Once the ramp completes: latch `demoExpired_` and take the **existing**
    bypass early-return — dry passthrough, never silence, exactly as §4.
+4. On that passthrough path, ramp the **dry** signal 0 → 1 over the same
+   ~30 ms, once. Then plain passthrough.
 
-After step 3 the plugin is cheaper than a licensed one: it returns before any
-DSP runs. The ramp executes once per instance, in demo mode only, and never in
+Step 4 was added 2026-09-11. Without it the output steps from silence straight
+to full-level input — a click whose size depends only on where the waveform
+happens to be (measured at up to 33× the signal's own sample-to-sample step at
+110 Hz). The result is a ~60 ms dip through silence rather than a crossfade,
+because a crossfade would need a copy of the dry input, which §4 forbids.
+
+After step 4 the plugin is cheaper than a licensed one: it returns before any
+DSP runs. Both ramps execute once per instance, in demo mode only, and never in
 a licensed build.
 
 ### Preset saving
@@ -432,7 +448,8 @@ refused, with a message pointing at the licence panel.
    immediately. A paying customer pays nothing for the demo mechanism.
 2. In demo mode the per-block cost is one 64-bit subtract and one compare,
    alongside the §4 atomic load. No clock call, no allocation, no I/O.
-3. The ramp is the only per-sample work, once per instance, ~30 ms.
+3. The two expiry ramps (processed signal out, then dry signal in) are the
+   only per-sample work, once per instance, ~30 ms each.
 
 ### States
 
@@ -454,5 +471,5 @@ long-session evaluation.
 
 Per DEVELOPMENT_PLAN Phase 3: one small shared module (Ed25519 verify + JSON
 parse + this state machine), living in its own repo/submodule consumed by
-both plugin repos. The JUCE-side UI (license panel, drag-drop, days-left
+both plugin repos. The JUCE-side UI (license panel, drag-drop, demo countdown
 badge) stays per-plugin but thin.
